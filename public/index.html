@@ -765,8 +765,6 @@ async function fetchStock(){
       body: JSON.stringify({ ticker })
     });
 
-    showStatus('Processing…', 'Claude is synthesising data into JSON…', 'loading', 70);
-
     if(!response.ok){
       const err = await response.json().catch(() => ({}));
       const msg = err?.error || `HTTP ${response.status}`;
@@ -774,13 +772,18 @@ async function fetchStock(){
       throw new Error(msg);
     }
 
-    const data = await response.json();
-
-    // Extract text from all content blocks (handles tool use + text)
-    const fullText = (data.content || [])
-      .filter(b => b.type === 'text')
-      .map(b => b.text)
-      .join('');
+    // Read streaming response
+    showStatus('Processing…', 'Claude is searching the web…', 'loading', 40);
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let fullText = '';
+    while(true){
+      const { done, value } = await reader.read();
+      if(done) break;
+      fullText += decoder.decode(value, { stream: true });
+      if(fullText.length > 200) showStatus('Processing…', 'Claude is synthesising data into JSON…', 'loading', 70);
+    }
+    fullText += decoder.decode();
 
     if(!fullText) throw new Error('No text response from Claude. Try again.');
 

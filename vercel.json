@@ -1,7 +1,7 @@
 {
   "functions": {
     "api/fetch.js": {
-      "maxDuration": 60
+      "runtime": "edge"
     }
   }
 }

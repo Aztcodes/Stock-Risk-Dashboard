@@ -1,7 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 
 export const config = {
-  maxDuration: 60,
+  runtime: 'edge',
 };
 
 const SYSTEM_PROMPT = `You are a financial data analyst. Your ONLY job is to produce a single valid JSON object for a stock risk report. Use the web_search tool to find the most current data available for the requested ticker before generating your response. You MUST search at minimum for: (1) current stock price and 52-week range today, (2) latest earnings results, revenue, margins, FCF, (3) analyst price targets and consensus rating, (4) recent catalysts and risk news.
@@ -125,61 +125,67 @@ SCHEMA (every field is required unless marked optional):
   "dataSources": string
 }`;
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+};
 
-export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+export default async function handler(req) {
+  if (req.method === 'OPTIONS') return new Response(null, { status: 200, headers: corsHeaders });
+  if (req.method !== 'POST') return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
 
-  if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  let ticker;
+  try {
+    const body = await req.json();
+    ticker = body?.ticker;
+  } catch {
+    return new Response(JSON.stringify({ error: 'Invalid request body' }), { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
+  }
 
-  const { ticker } = req.body ?? {};
   if (!ticker || typeof ticker !== 'string') {
-    return res.status(400).json({ error: 'ticker is required' });
+    return new Response(JSON.stringify({ error: 'ticker is required' }), { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
   }
 
   const clean = ticker.trim().toUpperCase().replace(/[^A-Z.]/g, '');
   if (!clean || clean.length > 10) {
-    return res.status(400).json({ error: 'Invalid ticker symbol' });
+    return new Response(JSON.stringify({ error: 'Invalid ticker symbol' }), { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
   }
 
   const today = new Date().toLocaleDateString('en-US', {
     month: 'short', day: 'numeric', year: 'numeric',
   });
 
-  try {
-    const message = await client.messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 8000,
-      system: [
-        {
-          type: 'text',
-          text: SYSTEM_PROMPT,
-          cache_control: { type: 'ephemeral' },
-        },
-      ],
-      tools: [
-        {
-          type: 'web_search_20250305',
-          name: 'web_search',
-          max_uses: 4,
-        },
-      ],
-      messages: [
-        {
-          role: 'user',
-          content: `Generate a complete risk report JSON payload for ${clean}. Today is ${today}.\n\nSearch for the following in order:\n1. "${clean} stock price today ${today}" — get the exact current price, today's change, 52-week high and low\n2. "${clean} latest earnings revenue EPS operating margin free cash flow 2026" — get the most recent quarterly results\n3. "${clean} analyst price target consensus rating buy hold sell ${today}" — get analyst ratings and targets\n4. "${clean} catalysts risks news ${today}" — get the latest news, upcoming earnings date, and key risks\n\nAfter searching, generate the complete JSON payload. Set fetchedAt to today's date. Ensure all 9 cards (3 per section) and exactly 5 catalysts and 5 risks are included.`,
-        },
-      ],
-    });
+  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-    return res.status(200).json(message);
-  } catch (err) {
-    if (err instanceof Anthropic.APIError) {
-      return res.status(err.status ?? 500).json({ error: err.message });
-    }
-    return res.status(500).json({ error: err?.message ?? 'Internal server error' });
-  }
+  const stream = new ReadableStream({
+    async start(controller) {
+      try {
+        const messageStream = client.messages.stream({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 8000,
+          system: [{ type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
+          tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 4 }],
+          messages: [{
+            role: 'user',
+            content: `Generate a complete risk report JSON payload for ${clean}. Today is ${today}.\n\nSearch for the following in order:\n1. "${clean} stock price today ${today}" — get the exact current price, today's change, 52-week high and low\n2. "${clean} latest earnings revenue EPS operating margin free cash flow 2026" — get the most recent quarterly results\n3. "${clean} analyst price target consensus rating buy hold sell ${today}" — get analyst ratings and targets\n4. "${clean} catalysts risks news ${today}" — get the latest news, upcoming earnings date, and key risks\n\nAfter searching, generate the complete JSON payload. Set fetchedAt to today's date. Ensure all 9 cards (3 per section) and exactly 5 catalysts and 5 risks are included.`,
+          }],
+        });
+
+        for await (const event of messageStream) {
+          if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
+            controller.enqueue(new TextEncoder().encode(event.delta.text));
+          }
+        }
+        controller.close();
+      } catch (err) {
+        const msg = err instanceof Anthropic.APIError ? err.message : (err?.message ?? 'Internal server error');
+        controller.error(new Error(msg));
+      }
+    },
+  });
+
+  return new Response(stream, {
+    headers: { 'Content-Type': 'text/plain; charset=utf-8', ...corsHeaders },
+  });
 }
