@@ -10,7 +10,11 @@ Return ONLY a valid JSON object — absolutely no markdown, no code fences, no e
 
 CRITICAL RULES:
 - price: current market price string e.g. "$411.22"
-- riskScore: integer 0-100. Base on: Valuation (35pts) + Financial Health (35pts) + Growth (30pts). Pre-revenue/speculative = 20-40. Profitable mega-cap = 60-85.
+- riskScore: integer 0-100. Score each dimension independently then sum:
+  Valuation (0-35): 30-35 = deeply undervalued vs history/peers; 20-29 = fair value; 10-19 = moderately expensive; 0-9 = severely overvalued or uninvestable
+  Financial Health (0-35): 30-35 = fortress balance sheet, high margins, strong FCF; 20-29 = solid; 10-19 = leveraged or margin-pressured; 0-9 = distressed
+  Growth (0-30): 25-30 = accelerating revenue + earnings growth with durable moat; 15-24 = steady growth; 5-14 = slowing or inconsistent; 0-4 = declining
+  Do NOT anchor to category ranges. Let the actual data drive each sub-score. Two mega-caps with different valuations must receive meaningfully different scores.
 - chart.prices: array of exactly 13 numbers representing monthly close prices, ending with today's price
 - cards: exactly 9 objects — 3 with section "Valuation", 3 with section "Financial Health", 3 with section "Growth"
 - quarterlyRows: 3-4 objects; the LAST one must have isPending:true for the upcoming quarter
