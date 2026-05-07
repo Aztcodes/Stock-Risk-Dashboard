@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aztel · AI Stock Ratings</title>
+<title>Aztic · AI Stock Ratings</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -66,26 +66,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:1
 #btn-fetch:hover{opacity:.85;}
 #btn-fetch:disabled{opacity:.4;cursor:not-allowed;}
 
-/* API Key row */
-.apikey-row{display:flex;gap:7px;align-items:center;}
-#apikey-input{
-  flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;
-  color:var(--text);font-family:var(--mono);font-size:10px;
-  padding:7px 10px;outline:none;transition:border-color .15s;
-}
-#apikey-input::placeholder{color:var(--dim);}
-#apikey-input:focus{border-color:var(--border3);}
-#btn-save-key{
-  background:transparent;border:1px solid var(--border2);color:var(--muted);
-  cursor:pointer;font-family:var(--mono);font-size:9px;font-weight:700;
-  padding:7px 10px;border-radius:6px;transition:all .15s;white-space:nowrap;
-}
-#btn-save-key:hover{border-color:var(--text);color:var(--text);}
-.key-status{font-family:var(--mono);font-size:9px;margin-top:5px;}
-.key-status.ok{color:var(--green);}
-.key-status.err{color:var(--red);}
-.key-status.none{color:var(--dim);}
-
 /* ─── STATUS / PROGRESS ──────────────────────────────────────────────── */
 #fetch-status{padding:10px 14px;border-bottom:1px solid var(--border);flex-shrink:0;display:none;}
 .fs-label{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
@@ -102,33 +82,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:1
 @keyframes spin{to{transform:rotate(360deg);}}
 .spinner{display:inline-block;width:10px;height:10px;border:2px solid var(--border);border-top-color:var(--amber);border-radius:50%;animation:spin .6s linear infinite;margin-right:6px;vertical-align:middle;}
 
-/* ─── JSON EDITOR ────────────────────────────────────────────────────── */
-#json-wrap{flex:1;display:flex;flex-direction:column;padding:12px;overflow:hidden;}
-#json-area{
-  flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:7px;
-  color:#a5f3fc;font-family:var(--mono);font-size:10.5px;line-height:1.6;
-  padding:11px;resize:none;outline:none;min-height:0;
-  scrollbar-width:thin;scrollbar-color:var(--border) transparent;
-}
-#json-area:focus{border-color:var(--border3);}
-#json-error{font-family:var(--mono);font-size:10px;color:var(--red);padding:5px 0;display:none;flex-shrink:0;}
-
-/* ─── SIDEBAR ACTIONS ────────────────────────────────────────────────── */
-#sidebar-actions{padding:10px 12px;border-top:1px solid var(--border);flex-shrink:0;display:flex;flex-direction:column;gap:7px;}
-#btn-render{
-  background:var(--text);color:var(--bg);border:none;cursor:pointer;
-  font-family:var(--mono);font-size:11px;font-weight:700;padding:9px;
-  border-radius:6px;letter-spacing:0.5px;transition:opacity .15s;
-}
-#btn-render:hover{opacity:.85;}
-.action-row{display:flex;gap:5px;}
-.btn-sm{
-  flex:1;background:transparent;color:var(--muted);border:1px solid var(--border2);
-  cursor:pointer;font-family:var(--mono);font-size:9px;font-weight:700;
-  padding:6px;border-radius:5px;letter-spacing:0.5px;transition:all .15s;text-align:center;
-}
-.btn-sm:hover{border-color:var(--text);color:var(--text);}
-
 /* ─── HISTORY TAB ────────────────────────────────────────────────────── */
 #history-list{padding:10px;display:flex;flex-direction:column;gap:5px;overflow-y:auto;flex:1;}
 .hist-item{background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:10px 12px;cursor:pointer;transition:border-color .15s;}
@@ -141,15 +94,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:1
 .hist-delete{background:none;border:none;color:var(--dim);cursor:pointer;font-size:13px;padding:2px 4px;border-radius:3px;transition:color .15s;}
 .hist-delete:hover{color:var(--red);}
 #no-history{padding:24px 16px;font-size:11px;color:var(--muted);text-align:center;line-height:1.8;}
-
-/* ─── SCHEMA TAB ─────────────────────────────────────────────────────── */
-#schema-content{padding:14px;overflow-y:auto;flex:1;font-size:10px;color:var(--muted);line-height:1.7;}
-#schema-content h3{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--text);margin:14px 0 5px;letter-spacing:0.5px;text-transform:uppercase;}
-#schema-content h3:first-child{margin-top:0;}
-#schema-content code{background:var(--bg3);color:#a5f3fc;font-family:var(--mono);font-size:9px;padding:1px 4px;border-radius:3px;}
-.field-row{display:flex;gap:8px;padding:3px 0;border-bottom:1px solid #1a1e2c;}
-.field-name{font-family:var(--mono);font-size:9px;color:#a5f3fc;min-width:130px;flex-shrink:0;}
-.field-desc{font-size:9px;color:var(--muted);}
 
 /* ─── LOADING STATE ──────────────────────────────────────────────────── */
 #loading-state{display:none;align-items:center;justify-content:center;min-height:85vh;}
@@ -387,14 +331,13 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:1
 <aside id="sidebar">
 
   <div id="sidebar-header">
-    <div class="sh-title">AZTEL</div>
-    <div class="sh-sub">AI-powered ratings · Type a ticker and fetch live data, or paste a JSON payload manually.</div>
+    <div class="sh-title">AZTIC</div>
+    <div class="sh-sub">AI-powered ratings · Type a ticker and click Fetch.</div>
   </div>
 
   <div id="sidebar-tabs">
     <div class="stab active" onclick="switchTab('data')">Data</div>
     <div class="stab" onclick="switchTab('history')">History</div>
-    <div class="stab" onclick="switchTab('schema')">Schema</div>
   </div>
 
   <!-- ── DATA TAB ── -->
@@ -416,79 +359,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:1
       <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
     </div>
 
-    <!-- JSON EDITOR -->
-    <div id="json-wrap">
-      <textarea id="json-area" spellcheck="false" placeholder="JSON data payload will appear here after fetch — or paste manually…"></textarea>
-      <div id="json-error"></div>
-    </div>
-
-    <div id="sidebar-actions">
-      <button id="btn-render" onclick="renderReport()">▶ RENDER REPORT</button>
-      <div class="action-row">
-        <button class="btn-sm" onclick="loadTemplate()">Template</button>
-        <button class="btn-sm" onclick="clearEditor()">Clear</button>
-        <button class="btn-sm" onclick="copyJSON()">Copy JSON</button>
-      </div>
-    </div>
-
   </div>
 
   <!-- ── HISTORY TAB ── -->
   <div class="tab-panel" id="tab-history">
     <div id="history-list">
       <div id="no-history">No reports yet.<br>Fetch or render a ticker to start building history.</div>
-    </div>
-  </div>
-
-  <!-- ── SCHEMA TAB ── -->
-  <div class="tab-panel" id="tab-schema">
-    <div id="schema-content">
-      <h3>Top-Level Fields</h3>
-      <div class="field-row"><div class="field-name">ticker</div><div class="field-desc">"MSFT"</div></div>
-      <div class="field-row"><div class="field-name">companyName</div><div class="field-desc">Full legal name</div></div>
-      <div class="field-row"><div class="field-name">exchange</div><div class="field-desc">"NASDAQ" / "NYSE"</div></div>
-      <div class="field-row"><div class="field-name">sector</div><div class="field-desc">Industry description</div></div>
-      <div class="field-row"><div class="field-name">description</div><div class="field-desc">One-line business desc</div></div>
-      <div class="field-row"><div class="field-name">accentColor</div><div class="field-desc">"#4f8ef7"</div></div>
-      <div class="field-row"><div class="field-name">accentGradient</div><div class="field-desc">CSS gradient string</div></div>
-      <div class="field-row"><div class="field-name">ratingLabel</div><div class="field-desc">"STRONG BUY" / "BUY" / "HOLD" / "SPEC BUY" / "SELL"</div></div>
-      <div class="field-row"><div class="field-name">ratingColor</div><div class="field-desc">Hex color</div></div>
-      <div class="field-row"><div class="field-name">analystCount</div><div class="field-desc">"41/49 Analysts"</div></div>
-      <div class="field-row"><div class="field-name">price</div><div class="field-desc">"$374.33"</div></div>
-      <div class="field-row"><div class="field-name">priceChangeSub</div><div class="field-desc">"▼ 31% from ATH"</div></div>
-      <div class="field-row"><div class="field-name">priceIsNeg</div><div class="field-desc">true / false</div></div>
-      <div class="field-row"><div class="field-name">week52</div><div class="field-desc">"$362 — $555"</div></div>
-      <div class="field-row"><div class="field-name">marketCap</div><div class="field-desc">"$2.78T"</div></div>
-      <div class="field-row"><div class="field-name">sharesOut</div><div class="field-desc">"7.43B"</div></div>
-      <div class="field-row"><div class="field-name">riskScore</div><div class="field-desc">Integer 0–100</div></div>
-      <div class="field-row"><div class="field-name">riskLabel</div><div class="field-desc">"LOW RISK · ATTRACTIVE"</div></div>
-      <div class="field-row"><div class="field-name">riskLabelColor</div><div class="field-desc">Hex color</div></div>
-      <div class="field-row"><div class="field-name">scoreVal / scoreHealth / scoreGrowth</div><div class="field-desc">"27 / 35"</div></div>
-      <div class="field-row"><div class="field-name">scoreValNote / scoreHealthNote / scoreGrowthNote</div><div class="field-desc">Short note strings</div></div>
-      <div class="field-row"><div class="field-name">fetchedAt</div><div class="field-desc">ISO timestamp (auto-set)</div></div>
-      <h3>kpis — array of 8</h3>
-      <div class="field-row"><div class="field-name">val, label, sub</div><div class="field-desc">String values</div></div>
-      <div class="field-row"><div class="field-name">subColor</div><div class="field-desc">"green"/"red"/"amber"/"muted"</div></div>
-      <h3>chart</h3>
-      <div class="field-row"><div class="field-name">months</div><div class="field-desc">Array of 13 strings</div></div>
-      <div class="field-row"><div class="field-name">prices</div><div class="field-desc">Array of 13 numbers</div></div>
-      <div class="field-row"><div class="field-name">yMin, yMax</div><div class="field-desc">Number bounds</div></div>
-      <div class="field-row"><div class="field-name">markers</div><div class="field-desc">Array of {monthIndex, label, sublabel, color}</div></div>
-      <h3>cards — exactly 9</h3>
-      <div class="field-row"><div class="field-name">section</div><div class="field-desc">"Valuation" / "Financial Health" / "Growth"</div></div>
-      <div class="field-row"><div class="field-name">type</div><div class="field-desc">"green"/"red"/"amber"</div></div>
-      <div class="field-row"><div class="field-name">badge, metric, value, sub, vs</div><div class="field-desc">Strings</div></div>
-      <h3>Page 2</h3>
-      <div class="field-row"><div class="field-name">nextEarningsDate</div><div class="field-desc">"Apr 29, 2026 (after close)"</div></div>
-      <div class="field-row"><div class="field-name">nextEarningsEst</div><div class="field-desc">Estimate string</div></div>
-      <div class="field-row"><div class="field-name">quarterlyRows</div><div class="field-desc">3–4 rows; last marked isPending:true</div></div>
-      <div class="field-row"><div class="field-name">latestEarnings</div><div class="field-desc">{title, stats[4], note}</div></div>
-      <div class="field-row"><div class="field-name">nextEarningsPreview</div><div class="field-desc">{title, intro, watchRows[4], consensusLabel, consensusNote}</div></div>
-      <div class="field-row"><div class="field-name">catalysts</div><div class="field-desc">Array of 5 {title, body}</div></div>
-      <div class="field-row"><div class="field-name">risks</div><div class="field-desc">Array of 5 {title, body}</div></div>
-      <div class="field-row"><div class="field-name">verdict</div><div class="field-desc">{ratingLine, ratingColor, analystBreakdown, avgTarget, targetUpside, streetHigh, needlePosition 0–100, verdictText}</div></div>
-      <div class="field-row"><div class="field-name">reportDate</div><div class="field-desc">"Apr 9, 2026"</div></div>
-      <div class="field-row"><div class="field-name">dataSources</div><div class="field-desc">Sources string</div></div>
     </div>
   </div>
 
@@ -501,7 +377,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:1
   <div id="empty-state">
     <div class="es-logo">∅</div>
     <div class="es-h">No report loaded</div>
-    <div class="es-p">Enter a ticker and click Fetch to generate a live AI report, or load the template to explore the format.</div>
+    <div class="es-p">Enter any ticker and click Fetch — Aztic will search live market data and generate a full AI-powered report.</div>
     <div class="es-pills">
       <span class="pill">MSFT</span><span class="pill">META</span><span class="pill">TSLA</span>
       <span class="pill">NVDA</span><span class="pill">AAPL</span><span class="pill">CRM</span>
@@ -509,21 +385,21 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:1
     </div>
     <div class="es-step">
       <div class="es-step-num">01</div>
-      <div class="es-step-text">Add your Anthropic API key in the <strong>Settings</strong> tab</div>
+      <div class="es-step-text">Type a ticker in the sidebar and click <strong>⚡ Fetch</strong></div>
     </div>
     <div class="es-step">
       <div class="es-step-num">02</div>
-      <div class="es-step-text">Type a ticker in the <strong>Data</strong> tab and click <strong>⚡ Fetch</strong></div>
+      <div class="es-step-text">Aztic searches live data and generates your report (~30–60s)</div>
     </div>
     <div class="es-step">
       <div class="es-step-num">03</div>
-      <div class="es-step-text">Click <strong>▶ Render Report</strong> to view the full 2-page report</div>
+      <div class="es-step-text">Browse <strong>Overview</strong> and <strong>Earnings &amp; Outlook</strong> pages</div>
     </div>
   </div>
 
   <div id="loading-state">
     <div class="ls-wrap">
-      <div class="ls-brand">Aztel</div>
+      <div class="ls-brand">Aztic</div>
       <div class="ls-ticker-lbl" id="ls-ticker"></div>
       <div class="ls-pct-wrap">
         <div class="ls-pct" id="ls-pct">0</div>
@@ -569,7 +445,7 @@ function clearAllData(){
 /* ═══════════════════════════════════════════════════════════════════
    TABS
 ═══════════════════════════════════════════════════════════════════ */
-const TAB_NAMES = ['data','history','schema'];
+const TAB_NAMES = ['data','history'];
 function switchTab(t){
   document.querySelectorAll('.stab').forEach((el,i) =>
     el.classList.toggle('active', TAB_NAMES[i] === t));
@@ -608,7 +484,7 @@ const LOADING_LINES = [
   'Weighing catalysts against tail risks…',
   'Running the numbers one more time…',
   'Checking if the street agrees for once…',
-  'Calibrating your Aztel rating…',
+  'Calibrating your Aztic rating…',
 ];
 
 let _lsTimer = null, _lsLineTimer = null, _lsStart = null, _lsLineIdx = 0;
@@ -661,12 +537,6 @@ function hideLoadingState(success){
     document.getElementById('loading-state').style.display = 'none';
   }, success ? 700 : 0);
 }
-function showError(msg){
-  const el = document.getElementById('json-error');
-  el.style.display = msg ? 'block' : 'none';
-  el.textContent = msg;
-}
-
 /* ═══════════════════════════════════════════════════════════════════
    HISTORY
 ═══════════════════════════════════════════════════════════════════ */
@@ -710,9 +580,8 @@ function renderHistoryList(){
 }
 
 function loadFromHistory(i){
-  document.getElementById('json-area').value = history_[i].raw;
+  _reportJSON = history_[i].raw;
   switchTab('data');
-  showError('');
   renderReport();
 }
 
@@ -724,129 +593,9 @@ function deleteHistory(e, i){
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   AI FETCH — ANTHROPIC API
+   AI FETCH
 ═══════════════════════════════════════════════════════════════════ */
-
-const SYSTEM_PROMPT = `You are a financial data analyst. Your ONLY job is to produce a single valid JSON object for a stock risk report. Use the web_search tool to find the most current data available for the requested ticker before generating your response. You MUST search at minimum for: (1) current stock price and 52-week range today, (2) latest earnings results, revenue, margins, FCF, (3) analyst price targets and consensus rating, (4) recent catalysts and risk news.
-
-Return ONLY a valid JSON object — absolutely no markdown, no code fences, no explanation, no text before or after the JSON. The JSON must be parseable with JSON.parse().
-
-CRITICAL RULES:
-- price: current market price string e.g. "$411.22"
-- riskScore: integer 0-100. Base on: Valuation (35pts) + Financial Health (35pts) + Growth (30pts). Pre-revenue/speculative = 20-40. Profitable mega-cap = 60-85.
-- chart.prices: array of exactly 13 numbers representing monthly close prices, ending with today's price
-- cards: exactly 9 objects — 3 with section "Valuation", 3 with section "Financial Health", 3 with section "Growth"
-- quarterlyRows: 3-4 objects; the LAST one must have isPending:true for the upcoming quarter
-- All string values must be properly JSON-escaped
-- fetchedAt: set to today's ISO date string
-
-SCHEMA (every field is required unless marked optional):
-{
-  "ticker": string,
-  "companyName": string,
-  "exchange": "NASDAQ" | "NYSE",
-  "sector": string,
-  "description": string (one sentence),
-  "accentColor": string (hex, pick a distinctive color matching the company brand),
-  "accentGradient": string (CSS gradient),
-  "ratingLabel": "STRONG BUY" | "BUY" | "HOLD" | "SPEC BUY" | "SELL",
-  "ratingColor": string (hex),
-  "analystCount": string e.g. "41/49 Analysts",
-  "price": string e.g. "$411.22",
-  "priceChangeSub": string e.g. "▼ 26% from ATH $555",
-  "priceIsNeg": boolean,
-  "week52": string e.g. "$355 — $555",
-  "marketCap": string e.g. "$3.05T",
-  "sharesOut": string e.g. "7.43B",
-  "riskScore": integer 0-100,
-  "riskLabel": string e.g. "LOW RISK · ATTRACTIVE",
-  "riskLabelColor": string (hex),
-  "scoreVal": string e.g. "25 / 35",
-  "scoreHealth": string e.g. "31 / 35",
-  "scoreGrowth": string e.g. "18 / 30",
-  "scoreValNote": string (short note on valuation score),
-  "scoreHealthNote": string (short note on health score),
-  "scoreGrowthNote": string (short note on growth score),
-  "fetchedAt": string (ISO date e.g. "2026-04-22"),
-  "kpis": [
-    {"val": string, "label": string, "sub": string, "subColor": "green"|"red"|"amber"|"muted"}
-  ],  // exactly 8 items
-  "chart": {
-    "months": [string],  // 13 month labels, last one "NOW"
-    "prices": [number],  // 13 price numbers
-    "yMin": number,
-    "yMax": number,
-    "markers": [
-      {"monthIndex": integer 0-12, "label": string, "sublabel": string, "color": string}
-    ]  // 2-4 annotated events
-  },
-  "cards": [
-    {
-      "section": "Valuation" | "Financial Health" | "Growth",
-      "type": "green" | "red" | "amber",
-      "badge": "BEAT" | "MISS" | "CAUTION" | "WATCH",
-      "metric": string,
-      "value": string,
-      "sub": string,
-      "vs": string
-    }
-  ],  // exactly 9 items
-  "nextEarningsDate": string,
-  "nextEarningsEst": string,
-  "quarterlyRows": [
-    {
-      "quarter": string,
-      "period": string,
-      "revenue": string,
-      "growth": string,
-      "growthPos": boolean | null,
-      "opIncome": string,
-      "margin": string,
-      "marginPos": boolean | null,
-      "eps": string,
-      "epsPos": boolean | null,
-      "metric": string,
-      "metricPos": boolean | null,
-      "tag": string,
-      "tagClass": "t-beat" | "t-miss" | "t-warn" | "t-pend",
-      "isPending": boolean  // only true for the upcoming/estimated quarter
-    }
-  ],
-  "latestEarnings": {
-    "title": string,
-    "stats": [
-      {"val": string, "label": string, "note": string, "noteGood": boolean}
-    ],  // exactly 4 items
-    "note": string (2-3 sentence summary)
-  },
-  "nextEarningsPreview": {
-    "title": string,
-    "intro": string,
-    "watchRows": [
-      {"label": string, "value": string}
-    ],  // exactly 4 items
-    "consensusLabel": string,
-    "consensusNote": string
-  },
-  "catalysts": [
-    {"title": string, "body": string}
-  ],  // exactly 5 items
-  "risks": [
-    {"title": string, "body": string}
-  ],  // exactly 5 items
-  "verdict": {
-    "ratingLine": string e.g. "STRONG BUY · RISK SCORE 74/100",
-    "ratingColor": string (hex),
-    "analystBreakdown": string,
-    "avgTarget": string e.g. "$588",
-    "targetUpside": string e.g. "+43%",
-    "streetHigh": string (optional, can be ""),
-    "needlePosition": integer 0-100,
-    "verdictText": string (3-4 sentences)
-  },
-  "reportDate": string e.g. "Apr 22, 2026",
-  "dataSources": string
-}`;
+let _reportJSON = '';
 
 async function fetchStock(){
   const ticker = document.getElementById('ticker-input').value.trim().toUpperCase();
@@ -855,13 +604,10 @@ async function fetchStock(){
   const btn = document.getElementById('btn-fetch');
   btn.disabled = true;
   btn.textContent = '…';
-  document.getElementById('json-area').value = '';
-  showError('');
+  _reportJSON = '';
 
   hideStatus();
   showLoadingState(ticker);
-
-  const today = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
 
   try {
     const response = await fetch('/api/fetch', {
@@ -901,7 +647,7 @@ async function fetchStock(){
 
     if(!parsed.fetchedAt) parsed.fetchedAt = new Date().toISOString().split('T')[0];
 
-    document.getElementById('json-area').value = JSON.stringify(parsed, null, 2);
+    _reportJSON = JSON.stringify(parsed, null, 2);
 
     hideLoadingState(true);
     setTimeout(() => renderReport(), 700);
@@ -1119,11 +865,10 @@ function buildFreshnessBanner(d){
 let currentData = null;
 
 function renderReport(){
-  const raw = document.getElementById('json-area').value.trim();
-  if(!raw){ showError('Paste or fetch a JSON payload first.'); return; }
+  const raw = _reportJSON.trim();
+  if(!raw) return;
   let d;
-  try{ d = JSON.parse(raw); } catch(e){ showError('JSON error: ' + e.message); return; }
-  showError('');
+  try{ d = JSON.parse(raw); } catch(e){ showStatus('Parse Error', e.message, 'error', 100); return; }
 
   const col = d.accentColor || '#ffffff';
   const grad = d.accentGradient || `linear-gradient(135deg,${col},${col})`;
@@ -1235,14 +980,14 @@ function renderReport(){
   <!-- ROW 1: GAUGE + SCORE BREAKDOWN -->
   <div class="metric-row">
     <div class="gauge-card">
-      <div class="g-lbl">Aztel Rating</div>
+      <div class="g-lbl">Aztic Rating</div>
       ${buildGauge(d.riskScore||50, col)}
       <div class="g-num">${d.riskScore}</div>
       <div class="g-rating" style="color:${d.riskLabelColor||col}">${d.riskLabel}</div>
       <div class="g-sub">As of ${d.reportDate}</div>
     </div>
     <div class="score-card" style="display:flex;flex-direction:column;justify-content:center;">
-      <div class="sc-hdr">Aztel Breakdown</div>
+      <div class="sc-hdr">Aztic Breakdown</div>
       <div class="sc-row">
         <div class="sc-top"><div class="sc-name">Valuation</div><div class="sc-val">${d.scoreVal}</div></div>
         ${scoreBar(d.scoreVal, `linear-gradient(90deg,${col},#818cf8)`)}
@@ -1276,7 +1021,7 @@ function renderReport(){
   ${cardsHTML}
 
   <div class="rfooter">
-    <span>${d.ticker} · Aztel · ${d.reportDate}</span>
+    <span>${d.ticker} · Aztic · ${d.reportDate}</span>
     <span>${d.dataSources||''}</span>
     <span>Overview</span>
   </div>
@@ -1338,7 +1083,7 @@ function renderReport(){
     <div style="display:flex;justify-content:space-between;align-items:flex-start;">
       <div>
         <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:7px;">Bottom Line · Verdict</div>
-        <div style="font-family:var(--mono);font-size:20px;font-weight:700;color:${vc};margin-bottom:6px;">${(v.ratingLine||'').replace(/RISK SCORE/gi,'AZTEL SCORE')}</div>
+        <div style="font-family:var(--mono);font-size:20px;font-weight:700;color:${vc};margin-bottom:6px;">${(v.ratingLine||'').replace(/RISK SCORE/gi,'AZTIC SCORE')}</div>
       </div>
       <div style="text-align:right;font-family:var(--mono);font-size:11px;color:var(--muted);">
         <div>${d.analystCount} Coverage</div>
@@ -1358,7 +1103,7 @@ function renderReport(){
   </div>
 
   <div class="rfooter">
-    <span>${d.ticker} · Aztel · ${d.reportDate}</span>
+    <span>${d.ticker} · Aztic · ${d.reportDate}</span>
     <span style="color:var(--red);font-size:10px">⚠ Informational only · Not financial advice</span>
     <span>Earnings &amp; Outlook</span>
   </div>
@@ -1417,7 +1162,7 @@ function copyToClipboard(){
   if(!currentData) return;
   const d = currentData, v = d.verdict||{};
   const txt = `${d.ticker} — ${d.companyName}
-AZTEL REPORT · ${d.reportDate}${d.fetchedAt ? ' · fetched '+d.fetchedAt : ''}
+AZTIC REPORT · ${d.reportDate}${d.fetchedAt ? ' · fetched '+d.fetchedAt : ''}
 ${'═'.repeat(52)}
 
 SCORE: ${d.riskScore}/100 · ${d.riskLabel}
@@ -1455,136 +1200,12 @@ Sources: ${d.dataSources||''}
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   EDITOR HELPERS
-═══════════════════════════════════════════════════════════════════ */
-function clearEditor(){
-  document.getElementById('json-area').value = '';
-  showError('');
-  hideStatus();
-}
-
-function copyJSON(){
-  const v = document.getElementById('json-area').value;
-  if(v) navigator.clipboard.writeText(v).catch(()=>{});
-}
-
-function loadTemplate(){
-  const t = {
-    ticker:"MSFT",companyName:"Microsoft Corporation",exchange:"NASDAQ",
-    sector:"Technology · Software & Cloud · Mega-Cap",
-    description:"Develops cloud (Azure), productivity (M365), gaming (Xbox) and AI infrastructure.",
-    accentColor:"#4f8ef7",accentGradient:"linear-gradient(135deg,#4f8ef7,#7b5cf0)",
-    ratingLabel:"STRONG BUY",ratingColor:"#22c55e",analystCount:"41/49 Analysts",
-    price:"$411.22",priceChangeSub:"▼ 26.0% from ATH $555",priceIsNeg:true,
-    week52:"$355 — $555",marketCap:"$3.05T",sharesOut:"7.43B",
-    riskScore:74,riskLabel:"LOW-MODERATE RISK · BUY",riskLabelColor:"#4f8ef7",
-    scoreVal:"25 / 35",scoreHealth:"31 / 35",scoreGrowth:"18 / 30",
-    scoreValNote:"Fwd P/E 20.7x — below 10yr avg 33x; GF Fair Value $540 implies 31% upside",
-    scoreHealthNote:"47% op margin, $75B+ FCF, D/E 0.32 — best-in-class balance sheet",
-    scoreGrowthNote:"Azure 39% YoY, $625B RPO backlog, Copilot 15M seats, capex headwind",
-    fetchedAt:new Date().toISOString().split('T')[0],
-    kpis:[
-      {val:"$411.22",label:"Current Price",sub:"▼ 26.0% from ATH",subColor:"red"},
-      {val:"24.1x",label:"P/E Ratio (TTM)",sub:"vs 10yr avg 33x",subColor:"green"},
-      {val:"20.7x",label:"Forward P/E",sub:"On ~$19.85 FY2026E EPS",subColor:"green"},
-      {val:"$305.5B",label:"Revenue TTM",sub:"+16.7% YoY",subColor:"green"},
-      {val:"46.7%",label:"Operating Margin",sub:"EBITDA margin: 57.7%",subColor:"green"},
-      {val:"$75B+",label:"Free Cash Flow TTM",sub:"Yield ~2.5%",subColor:"amber"},
-      {val:"0.89%",label:"Dividend Yield",sub:"$3.64/share",subColor:"muted"},
-      {val:"$588.48",label:"Analyst Avg Target",sub:"+43.1% upside",subColor:"green"}
-    ],
-    chart:{
-      months:["APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC","JAN","FEB","MAR","NOW"],
-      prices:[395,430,470,490,520,535,555,530,500,432,395,368,411],
-      yMin:310,yMax:590,
-      markers:[
-        {monthIndex:6,label:"ATH $555",sublabel:"Oct '25",color:"#f59e0b"},
-        {monthIndex:9,label:"Q2 Selloff",sublabel:"Jan '26",color:"#ef4444"},
-        {monthIndex:12,label:"+4.6% today",sublabel:"Apr 15",color:"#22c55e"}
-      ]
-    },
-    cards:[
-      {section:"Valuation",type:"green",badge:"BEAT",metric:"P/E vs 10yr Average",value:"24.1x",sub:"27% below 10yr median (33x)",vs:"GF Fair Value: $540 · 31.5% discount"},
-      {section:"Valuation",type:"green",badge:"BEAT",metric:"Forward P/E",value:"20.7x",sub:"On ~$19.85 FY2026E EPS · PEG 1.51",vs:"vs sector avg ~30x · EV/EBITDA 16.8x"},
-      {section:"Valuation",type:"amber",badge:"CAUTION",metric:"EV / FCF",value:"38.1x",sub:"FCF yield ~2.5% · capex still elevated",vs:"$37.5B/qtr capex drag continues"},
-      {section:"Financial Health",type:"green",badge:"BEAT",metric:"Operating Margin",value:"46.7%",sub:"EBITDA margin 57.7% · dwarfs peers",vs:"Gross margin 68.6% · Net 39%"},
-      {section:"Financial Health",type:"green",badge:"BEAT",metric:"Balance Sheet",value:"$89.5B",sub:"Cash + securities · D/E 0.32",vs:"ROE 34.4% · ROIC 28.8%"},
-      {section:"Financial Health",type:"green",badge:"BEAT",metric:"Shareholder Returns",value:"$12.7B",sub:"Buybacks + dividends in Q2 FY2026",vs:"$364B returned over past decade"},
-      {section:"Growth",type:"green",badge:"BEAT",metric:"Azure Growth Q2 FY26",value:"39%",sub:"9th consecutive quarter ≥30%",vs:"AI services = 16pp of Azure growth"},
-      {section:"Growth",type:"green",badge:"BEAT",metric:"M365 Copilot Seats",value:"15M+",sub:"+75% YoY · 70% of Fortune 500",vs:"$99/mo AI suite launched Mar '26"},
-      {section:"Growth",type:"amber",badge:"CAUTION",metric:"Capex / FCF Squeeze",value:"$37.5B",sub:"Single quarter capex · margin headwind",vs:"FCF yield below 2.5% at current cap"}
-    ],
-    nextEarningsDate:"Apr 29, 2026 (after close)",
-    nextEarningsEst:"Q3 FY2026 · Est. EPS $4.04 · Est. Rev $80.7–81.8B",
-    quarterlyRows:[
-      {quarter:"Q1 FY2026",period:"Sep '25",revenue:"$77.7B",growth:"+18%",growthPos:true,opIncome:"$38.0B",margin:"48.9%",marginPos:true,eps:"$4.13",epsPos:true,metric:"Azure 40%",metricPos:true,tag:"BEAT",tagClass:"t-beat"},
-      {quarter:"Q2 FY2026",period:"Dec '25",revenue:"$81.3B",growth:"+17%",growthPos:true,opIncome:"$38.3B",margin:"47.1%",marginPos:false,eps:"$4.14",epsPos:true,metric:"Azure 39%",metricPos:false,tag:"MIXED",tagClass:"t-warn"},
-      {quarter:"Q3 FY2026E",period:"Mar '26 · Apr 29",revenue:"$80.7–81.8B",growth:"~+15%",growthPos:true,opIncome:"~$36–37B",margin:"~45%",marginPos:null,eps:"$4.04E",epsPos:null,metric:"Azure 38–40%?",metricPos:null,tag:"PENDING",tagClass:"t-pend",isPending:true}
-    ],
-    latestEarnings:{
-      title:"Latest Earnings · Q2 FY2026",
-      stats:[
-        {val:"$81.3B",label:"Revenue",note:"✓ Beat est. $81.0B",noteGood:true},
-        {val:"$4.14",label:"EPS (non-GAAP)",note:"✓ Beat est. $3.90 (+6.2%)",noteGood:true},
-        {val:"47.1%",label:"Op Margin",note:"⚠ Down from 48.9% in Q1",noteGood:false},
-        {val:"39%",label:"Azure Growth",note:"⚠ Slipped from 40% Q1",noteGood:false}
-      ],
-      note:"Beat on revenue and EPS but Azure slipped 1pp to 39% triggering a ~10% post-earnings selloff. Cloud revenue crossed $50B for the first time. Commercial RPO hit $625B (+110% YoY) anchored by OpenAI's $250B commitment."
-    },
-    nextEarningsPreview:{
-      title:"Q3 FY2026 Preview · Apr 29",
-      intro:"Same day as META. Stock up +4.6% today on Copilot launches. The bar has risen. Key watchpoints:",
-      watchRows:[
-        {label:"Azure growth rate",value:"Bull ≥39% · Bear <37%"},
-        {label:"Op margin guidance Q4/FY27",value:"Capex drag ease in H2?"},
-        {label:"Copilot seats",value:"15M → need 18M+ to impress"},
-        {label:"More Personal Computing",value:"Xbox/Surface — missed last qtr"}
-      ],
-      consensusLabel:"CONSENSUS",
-      consensusNote:"EPS est. $4.04–4.05 (+16.8% YoY) · Rev $80.7–81.8B · 4 consecutive beats · 41/49 analysts Strong Buy"
-    },
-    catalysts:[
-      {title:"Still Historically Cheap at 24x TTM",body:"Even after a 4.6% surge, MSFT trades 27% below its 10-year average P/E of 33x. GF Fair Value of $540 implies 31% upside. The re-rate has only partially closed."},
-      {title:"Q3 Earnings Apr 29 — Low Bar on Azure",body:"Consensus EPS $4.04–4.05 implies 16.8% YoY growth. Holding 39%+ Azure plus any capex moderation signal could push toward $450+."},
-      {title:"$625B Commercial RPO Backlog",body:"Up 110% YoY, anchored by OpenAI's $250B Azure commitment. Forward revenue visibility arguably the strongest of any S&P 500 company."},
-      {title:"Copilot + $99/mo AI Suite",body:"15M+ paid seats at Fortune 500. New consumer AI suite launched March 2026. Azure now hosts models from OpenAI, Anthropic, Meta, xAI and DeepSeek."},
-      {title:"Operating Leverage 3:1",body:"Revenue grew 3.4x faster than operating expenses in Q2. Returned $12.7B to shareholders in a single quarter via buybacks and dividends."}
-    ],
-    risks:[
-      {title:"Azure Deceleration Risk",body:"Any print below 37% on Apr 29 would trigger another leg down. Barclays flagged large-numbers ceiling at ~39–40%."},
-      {title:"Capex 200bp Margin Headwind",body:"$37.5B/qtr capex compressing FCF. Operating margin guidance Q3 at ~45% is below prior ~45.5% consensus."},
-      {title:"OpenAI Concentration Risk",body:"$250B in RPO tied to one customer. Any fracture in the Microsoft-OpenAI relationship creates a material revenue hole."},
-      {title:"Valuation Reset Risk",body:"If AI ROI delays to 2028–2029, multiple vulnerable to compression toward 16–18x bear case (~$290–$330)."},
-      {title:"Macro & Geopolitical Headwinds",body:"Enterprise IT budget freezes, EU antitrust scrutiny on Activision/OpenAI, and underperforming More Personal Computing segment."}
-    ],
-    verdict:{
-      ratingLine:"STRONG BUY · RISK SCORE 74/100",
-      ratingColor:"#4f8ef7",
-      analystBreakdown:"41 Strong Buy · 4 Mod. Buy · 4 Hold",
-      avgTarget:"$588.48",
-      targetUpside:"+43.1%",
-      streetHigh:"$730 (Wedbush / UBS)",
-      needlePosition:84,
-      verdictText:"MSFT is up ~10% from its April 9 price of $374, which shifts the score from 79 to 74. Still compellingly cheap at 24x TTM P/E — 27% below the 10-year average. The fundamental thesis is intact: four consecutive beats, $625B RPO, Azure at 39% growth, Copilot at 15M seats. The April 29 earnings call remains the decisive catalyst. A clean beat with Azure ≥39% would likely push MSFT through $450 toward the $588 analyst consensus."
-    },
-    reportDate:"Apr 15, 2026",
-    dataSources:"SEC filings · StockAnalysis · GuruFocus · TradingKey · Barchart"
-  };
-  document.getElementById('json-area').value = JSON.stringify(t, null, 2);
-  showError('');
-  hideStatus();
-}
-
-/* ═══════════════════════════════════════════════════════════════════
    INIT
 ═══════════════════════════════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
   renderHistoryList();
   document.getElementById('ticker-input').addEventListener('keydown', e => {
     if(e.key === 'Enter'){ e.preventDefault(); fetchStock(); }
-  });
-  document.getElementById('json-area').addEventListener('keydown', e => {
-    if((e.ctrlKey||e.metaKey) && e.key === 'Enter'){ e.preventDefault(); renderReport(); }
   });
 });
 </script>
