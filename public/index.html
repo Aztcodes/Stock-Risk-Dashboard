@@ -115,16 +115,28 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:1
 @keyframes lsDot{0%,80%,100%{transform:scale(1);background:var(--border2);}40%{transform:scale(1.4);background:var(--muted);}}
 
 /* ─── EMPTY STATE ────────────────────────────────────────────────────── */
-#empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:85vh;text-align:center;padding:40px;gap:14px;max-width:520px;margin:0 auto;}
-.es-logo{font-family:var(--mono);font-size:40px;font-weight:700;color:var(--border2);letter-spacing:-2px;}
-.es-h{font-size:18px;font-weight:600;color:var(--muted);}
-.es-p{font-size:12px;color:var(--dim);max-width:380px;line-height:1.8;}
-.es-pills{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;}
-.pill{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:4px 11px;font-family:var(--mono);font-size:9px;color:var(--muted);}
-.es-step{display:flex;align-items:center;gap:10px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;width:100%;max-width:340px;text-align:left;}
-.es-step-num{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--dim);flex-shrink:0;}
-.es-step-text{font-size:11px;color:var(--muted);line-height:1.5;}
+#empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:85vh;text-align:center;padding:48px 40px;gap:20px;max-width:680px;margin:0 auto;}
+.es-logo{font-family:var(--mono);font-size:64px;font-weight:700;color:var(--border2);letter-spacing:-2px;}
+.es-h{font-size:28px;font-weight:600;color:var(--muted);}
+.es-p{font-size:14px;color:var(--dim);max-width:500px;line-height:1.9;}
+.es-pills{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+.pill{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:5px 14px;font-family:var(--mono);font-size:11px;color:var(--muted);}
+.es-step{display:flex;align-items:center;gap:14px;background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:14px 18px;width:100%;max-width:480px;text-align:left;}
+.es-step-num{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--dim);flex-shrink:0;}
+.es-step-text{font-size:13px;color:var(--muted);line-height:1.5;}
 .es-step-text strong{color:var(--text);}
+
+/* ─── QUICK PICKS ────────────────────────────────────────────────────── */
+#quick-picks{padding:14px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.qp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:8px;}
+.qp-btn{background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--muted);cursor:pointer;font-family:var(--mono);font-size:10px;font-weight:700;padding:8px 4px;letter-spacing:0.5px;transition:all .15s;text-align:center;}
+.qp-btn:hover{border-color:var(--border3);color:var(--text);background:var(--bg2);}
+
+/* ─── SIDEBAR FOOTER ─────────────────────────────────────────────────── */
+#sidebar-footer{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:20px 14px;gap:5px;}
+.sf-mark{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--border);letter-spacing:3px;}
+.sf-note{font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;line-height:1.7;}
+.sf-disc{font-family:var(--mono);font-size:9px;color:var(--dim);opacity:0.5;}
 
 /* ─── PAGE BREAK ─────────────────────────────────────────────────────── */
 .page-break{border:none;border-top:1px solid var(--border2);margin:44px 0;}
@@ -357,6 +369,29 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:1
       <div class="fs-label" id="status-label">Status</div>
       <div class="fs-message" id="status-message"></div>
       <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    </div>
+
+    <!-- QUICK PICKS -->
+    <div id="quick-picks">
+      <div class="fp-label">Quick Picks</div>
+      <div class="qp-grid">
+        <button class="qp-btn" onclick="quickFetch('MSFT')">MSFT</button>
+        <button class="qp-btn" onclick="quickFetch('META')">META</button>
+        <button class="qp-btn" onclick="quickFetch('NVDA')">NVDA</button>
+        <button class="qp-btn" onclick="quickFetch('AAPL')">AAPL</button>
+        <button class="qp-btn" onclick="quickFetch('TSLA')">TSLA</button>
+        <button class="qp-btn" onclick="quickFetch('GOOGL')">GOOGL</button>
+        <button class="qp-btn" onclick="quickFetch('AMZN')">AMZN</button>
+        <button class="qp-btn" onclick="quickFetch('CRM')">CRM</button>
+        <button class="qp-btn" onclick="quickFetch('OKLO')">OKLO</button>
+      </div>
+    </div>
+
+    <!-- SIDEBAR FOOTER -->
+    <div id="sidebar-footer">
+      <div class="sf-mark">AZTIC</div>
+      <div class="sf-note">AI-powered · Live market data<br>~30–60s per report</div>
+      <div class="sf-disc">Not financial advice</div>
     </div>
 
   </div>
@@ -596,6 +631,11 @@ function deleteHistory(e, i){
    AI FETCH
 ═══════════════════════════════════════════════════════════════════ */
 let _reportJSON = '';
+
+function quickFetch(ticker){
+  document.getElementById('ticker-input').value = ticker;
+  fetchStock();
+}
 
 async function fetchStock(){
   const ticker = document.getElementById('ticker-input').value.trim().toUpperCase();
