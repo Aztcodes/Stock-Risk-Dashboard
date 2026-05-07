@@ -151,6 +151,25 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:1
 .field-name{font-family:var(--mono);font-size:9px;color:#a5f3fc;min-width:130px;flex-shrink:0;}
 .field-desc{font-size:9px;color:var(--muted);}
 
+/* ─── LOADING STATE ──────────────────────────────────────────────────── */
+#loading-state{display:none;align-items:center;justify-content:center;min-height:85vh;}
+.ls-wrap{text-align:center;display:flex;flex-direction:column;align-items:center;gap:18px;max-width:440px;width:100%;padding:40px;}
+.ls-brand{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:4px;color:var(--dim);text-transform:uppercase;animation:lsPulse 2.4s ease-in-out infinite;}
+.ls-ticker-lbl{font-family:var(--mono);font-size:22px;font-weight:700;letter-spacing:2px;color:var(--text);}
+.ls-pct-wrap{display:flex;align-items:flex-start;gap:4px;line-height:1;}
+.ls-pct{font-family:var(--mono);font-size:80px;font-weight:700;line-height:1;color:var(--text);min-width:3ch;text-align:right;}
+.ls-pct-sym{font-family:var(--mono);font-size:28px;font-weight:600;color:var(--muted);margin-top:12px;}
+.ls-line{font-size:13px;color:var(--muted);min-height:20px;font-style:italic;line-height:1.6;transition:opacity .35s ease;}
+.ls-line.fade{opacity:0;}
+.ls-bar-wrap{width:100%;max-width:300px;height:2px;background:var(--border);border-radius:1px;overflow:hidden;}
+.ls-bar-fill{height:100%;background:var(--text);border-radius:1px;width:0%;transition:width .6s ease;}
+.ls-dots{display:flex;gap:6px;margin-top:4px;}
+.ls-dot{width:5px;height:5px;border-radius:50%;background:var(--border2);animation:lsDot 1.4s ease-in-out infinite;}
+.ls-dot:nth-child(2){animation-delay:.2s;}
+.ls-dot:nth-child(3){animation-delay:.4s;}
+@keyframes lsPulse{0%,100%{opacity:.4;}50%{opacity:1;}}
+@keyframes lsDot{0%,80%,100%{transform:scale(1);background:var(--border2);}40%{transform:scale(1.4);background:var(--muted);}}
+
 /* ─── EMPTY STATE ────────────────────────────────────────────────────── */
 #empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:85vh;text-align:center;padding:40px;gap:14px;max-width:520px;margin:0 auto;}
 .es-logo{font-family:var(--mono);font-size:40px;font-weight:700;color:var(--border2);letter-spacing:-2px;}
@@ -502,6 +521,24 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:1
     </div>
   </div>
 
+  <div id="loading-state">
+    <div class="ls-wrap">
+      <div class="ls-brand">Aztel</div>
+      <div class="ls-ticker-lbl" id="ls-ticker"></div>
+      <div class="ls-pct-wrap">
+        <div class="ls-pct" id="ls-pct">0</div>
+        <div class="ls-pct-sym">%</div>
+      </div>
+      <div class="ls-line" id="ls-line">Initialising…</div>
+      <div class="ls-bar-wrap"><div class="ls-bar-fill" id="ls-bar-fill"></div></div>
+      <div class="ls-dots">
+        <div class="ls-dot"></div>
+        <div class="ls-dot"></div>
+        <div class="ls-dot"></div>
+      </div>
+    </div>
+  </div>
+
   <div id="report-wrap"></div>
 
 </main>
@@ -555,6 +592,75 @@ function showStatus(label, msg, type, pct){
   pf.className = 'progress-fill' + (type==='error'?' err':type==='success'?' done':'');
 }
 function hideStatus(){ document.getElementById('fetch-status').style.display='none'; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   LOADING STATE
+═══════════════════════════════════════════════════════════════════ */
+const LOADING_LINES = [
+  'Reading earnings transcripts so you don\'t have to…',
+  'Interrogating sell-side analysts…',
+  'Cross-referencing 52-week price action…',
+  'Checking if the bears actually have a point…',
+  'Stress-testing the bull thesis…',
+  'Translating analyst-speak into plain English…',
+  'Calculating what the market might be missing…',
+  'Separating signal from noise…',
+  'Weighing catalysts against tail risks…',
+  'Running the numbers one more time…',
+  'Checking if the street agrees for once…',
+  'Calibrating your Aztel rating…',
+];
+
+let _lsTimer = null, _lsLineTimer = null, _lsStart = null, _lsLineIdx = 0;
+
+function showLoadingState(ticker){
+  document.getElementById('empty-state').style.display = 'none';
+  document.getElementById('report-wrap').style.display = 'none';
+  document.getElementById('loading-state').style.display = 'flex';
+  document.getElementById('ls-ticker').textContent = ticker;
+  document.getElementById('ls-pct').textContent = '0';
+  document.getElementById('ls-bar-fill').style.width = '0%';
+
+  _lsStart = Date.now();
+  _lsLineIdx = 0;
+
+  // Fast-then-slow easing: linear to 50% in 15s, then asymptotic to 90%
+  _lsTimer = setInterval(() => {
+    const t = (Date.now() - _lsStart) / 1000;
+    const pct = t < 15
+      ? Math.round(t * 50 / 15)
+      : Math.round(50 + 40 * (1 - Math.exp(-(t - 15) / 22)));
+    document.getElementById('ls-pct').textContent = Math.min(pct, 90);
+    document.getElementById('ls-bar-fill').style.width = Math.min(pct, 90) + '%';
+  }, 400);
+
+  _lsUpdateLine(ticker);
+  _lsLineTimer = setInterval(() => _lsUpdateLine(ticker), 4200);
+}
+
+function _lsUpdateLine(ticker){
+  const el = document.getElementById('ls-line');
+  el.classList.add('fade');
+  setTimeout(() => {
+    const lines = [`Scanning live data for ${ticker}…`, ...LOADING_LINES];
+    el.textContent = lines[_lsLineIdx % lines.length];
+    el.classList.remove('fade');
+    _lsLineIdx++;
+  }, 350);
+}
+
+function hideLoadingState(success){
+  clearInterval(_lsTimer);
+  clearInterval(_lsLineTimer);
+  if(success){
+    document.getElementById('ls-pct').textContent = '100';
+    document.getElementById('ls-bar-fill').style.width = '100%';
+    document.getElementById('ls-line').textContent = 'Report ready.';
+  }
+  setTimeout(() => {
+    document.getElementById('loading-state').style.display = 'none';
+  }, success ? 700 : 0);
+}
 function showError(msg){
   const el = document.getElementById('json-error');
   el.style.display = msg ? 'block' : 'none';
@@ -752,13 +858,12 @@ async function fetchStock(){
   document.getElementById('json-area').value = '';
   showError('');
 
-  showStatus('Searching web…', `Finding current data for ${ticker}…`, 'loading', 15);
+  hideStatus();
+  showLoadingState(ticker);
 
   const today = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
 
   try {
-    showStatus('Contacting Claude…', `Sending ${ticker} query with web search enabled…`, 'loading', 30);
-
     const response = await fetch('/api/fetch', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -772,8 +877,6 @@ async function fetchStock(){
       throw new Error(msg);
     }
 
-    // Read streaming response
-    showStatus('Processing…', 'Claude is searching the web…', 'loading', 40);
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let fullText = '';
@@ -781,13 +884,11 @@ async function fetchStock(){
       const { done, value } = await reader.read();
       if(done) break;
       fullText += decoder.decode(value, { stream: true });
-      if(fullText.length > 200) showStatus('Processing…', 'Claude is synthesising data into JSON…', 'loading', 70);
     }
     fullText += decoder.decode();
 
     if(!fullText) throw new Error('No text response from Claude. Try again.');
 
-    // Extract JSON — handle potential code fences defensively
     let jsonStr = fullText.trim();
     const fenceMatch = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);
     if(fenceMatch) jsonStr = fenceMatch[1].trim();
@@ -795,23 +896,19 @@ async function fetchStock(){
     const lastBrace = jsonStr.lastIndexOf('}');
     if(firstBrace !== -1 && lastBrace !== -1) jsonStr = jsonStr.substring(firstBrace, lastBrace + 1);
 
-    // Validate JSON
     const parsed = JSON.parse(jsonStr);
     if(!parsed.ticker) throw new Error('Response missing required fields. Try fetching again.');
 
-    // Ensure fetchedAt is set
     if(!parsed.fetchedAt) parsed.fetchedAt = new Date().toISOString().split('T')[0];
 
-    const formatted = JSON.stringify(parsed, null, 2);
-    document.getElementById('json-area').value = formatted;
+    document.getElementById('json-area').value = JSON.stringify(parsed, null, 2);
 
-    showStatus('Done ✓', `${ticker} data fetched successfully · ${today}`, 'success', 100);
-    setTimeout(() => {
-      hideStatus();
-      renderReport();
-    }, 1200);
+    hideLoadingState(true);
+    setTimeout(() => renderReport(), 700);
 
   } catch(err) {
+    hideLoadingState(false);
+    document.getElementById('empty-state').style.display = 'flex';
     showStatus('Fetch Failed', err.message, 'error', 100);
     console.error('Fetch error:', err);
   } finally {
