@@ -169,7 +169,7 @@ export default async function handler(req) {
           model: 'claude-sonnet-4-6',
           max_tokens: 5500,
           system: [{ type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
-          tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 3 }],
+          tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 4 }],
           messages: [{
             role: 'user',
             content: `Generate a complete risk report JSON payload for ${clean}. Today is ${today}.\n\nSearch for the following in order:\n1. "${clean} stock price today ${today}" — get the exact current price, today's change, 52-week high and low\n2. "${clean} latest earnings revenue EPS operating margin free cash flow 2026" — get the most recent quarterly results\n3. "${clean} analyst price target consensus rating buy hold sell ${today}" — get analyst ratings and targets\n4. "${clean} catalysts risks news ${today}" — get the latest news, upcoming earnings date, and key risks\n\nAfter searching, generate the complete JSON payload. Set fetchedAt to today's date. Ensure all 9 cards (3 per section) and exactly 5 catalysts and 5 risks are included.`,
