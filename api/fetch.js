@@ -167,7 +167,7 @@ export default async function handler(req) {
       try {
         const messageStream = client.messages.stream({
           model: 'claude-sonnet-4-6',
-          max_tokens: 5500,
+          max_tokens: 8000,
           system: [{ type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
           tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 4 }],
           messages: [{
