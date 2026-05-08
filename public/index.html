@@ -6,6 +6,7 @@
 <title>Aztic · AI Stock Ratings</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 /* ─── TOKENS ─────────────────────────────────────────────────────────── */
 :root {
@@ -333,17 +334,73 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:1
 ::-webkit-scrollbar{width:4px;height:4px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+/* ─── AUTH SCREEN ────────────────────────────────────────────────── */
+#auth-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px;}
+.auth-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:36px 32px;width:100%;max-width:380px;}
+.auth-logo{font-family:var(--mono);font-size:18px;font-weight:700;letter-spacing:4px;color:var(--text);margin-bottom:4px;}
+.auth-tag{font-size:11px;color:var(--muted);margin-bottom:24px;}
+.auth-tabs{display:flex;border:1px solid var(--border);border-radius:7px;overflow:hidden;margin-bottom:18px;}
+.auth-tab{flex:1;background:transparent;border:none;color:var(--muted);cursor:pointer;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:0.5px;padding:9px;text-transform:uppercase;transition:all .15s;}
+.auth-tab.active{background:var(--bg3);color:var(--text);}
+.auth-field{display:block;width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:7px;color:var(--text);font-size:13px;font-family:var(--body);padding:10px 12px;outline:none;transition:border-color .15s;margin-bottom:10px;}
+.auth-field:focus{border-color:var(--border3);}
+.auth-field::placeholder{color:var(--dim);}
+#auth-error{font-family:var(--mono);font-size:10px;color:var(--red);min-height:16px;margin-bottom:8px;line-height:1.4;}
+#auth-error.ok{color:var(--green);}
+.auth-submit{width:100%;background:var(--text);color:var(--bg);border:none;cursor:pointer;font-family:var(--mono);font-size:11px;font-weight:700;padding:12px;border-radius:7px;letter-spacing:0.5px;transition:opacity .15s;margin-bottom:14px;}
+.auth-submit:hover{opacity:.85;}
+.auth-submit:disabled{opacity:.4;cursor:not-allowed;}
+.auth-divider{text-align:center;font-size:10px;color:var(--dim);margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+.auth-google{width:100%;background:transparent;border:1px solid var(--border2);color:var(--text);cursor:pointer;font-size:13px;font-family:var(--body);font-weight:500;padding:10px;border-radius:7px;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:9px;}
+.auth-google:hover{border-color:var(--border3);background:var(--bg3);}
+.auth-footer{font-size:9px;color:var(--dim);text-align:center;margin-top:20px;font-family:var(--mono);line-height:1.8;}
+
+/* sign-out button in sidebar header */
+.sh-signout{background:none;border:1px solid var(--border);border-radius:4px;color:var(--dim);cursor:pointer;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:0.5px;padding:4px 8px;transition:all .15s;}
+.sh-signout:hover{border-color:var(--border2);color:var(--muted);}
 </style>
 </head>
 <body>
 <div class="noise"></div>
 
-<div id="shell">
+<!-- ══════════════════ AUTH SCREEN ══════════════════ -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">AZTIC</div>
+    <div class="auth-tag">AI-powered stock ratings · Private beta</div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="setAuthMode('signin')">Sign In</button>
+      <button class="auth-tab" onclick="setAuthMode('signup')">Sign Up</button>
+    </div>
+    <div id="auth-error"></div>
+    <input id="auth-email" class="auth-field" type="email" placeholder="Email address" autocomplete="email">
+    <input id="auth-password" class="auth-field" type="password" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')submitAuth()">
+    <button id="auth-submit" class="auth-submit" onclick="submitAuth()">Sign In</button>
+    <div class="auth-divider">or</div>
+    <button class="auth-google" onclick="signInWithGoogle()">
+      <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+      </svg>
+      Continue with Google
+    </button>
+    <div class="auth-footer">Private beta · By invitation only<br>Not financial advice</div>
+  </div>
+</div>
+
+<div id="shell" style="display:none">
 <!-- ══════════════════ SIDEBAR ══════════════════ -->
 <aside id="sidebar">
 
   <div id="sidebar-header">
-    <div class="sh-title">AZTIC</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div class="sh-title">AZTIC</div>
+      <button class="sh-signout" id="auth-signout-btn" onclick="signOut()" style="display:none">Sign out</button>
+    </div>
     <div class="sh-sub">AI-powered ratings · Type a ticker and click Fetch.</div>
   </div>
 
@@ -684,9 +741,13 @@ async function fetchStock(){
   fetchLivePrice(ticker); // runs in parallel — resolves long before Claude finishes
 
   try {
+    const token = await getAccessToken();
     const response = await fetch('/api/fetch', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+      },
       body: JSON.stringify({ ticker })
     });
 
@@ -1282,10 +1343,102 @@ Sources: ${d.dataSources||''}
 }
 
 /* ═══════════════════════════════════════════════════════════════════
+   AUTH
+═══════════════════════════════════════════════════════════════════ */
+let _supabase = null, _authMode = 'signin';
+
+async function initAuth(){
+  let cfg = {};
+  try { cfg = await fetch('/api/config').then(r => r.json()); } catch {}
+
+  if(!cfg.supabaseUrl){
+    showApp(null); return; // dev mode: no auth configured
+  }
+
+  _supabase = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+
+  const { data: { session } } = await _supabase.auth.getSession();
+
+  _supabase.auth.onAuthStateChange((event, session) => {
+    if(session) showApp(session);
+    else showAuthScreen();
+  });
+
+  if(session) showApp(session);
+  else showAuthScreen();
+}
+
+function showApp(session){
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('shell').style.display = 'flex';
+  if(session) document.getElementById('auth-signout-btn').style.display = '';
+  renderHistoryList();
+}
+
+function showAuthScreen(){
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('shell').style.display = 'none';
+}
+
+function setAuthMode(mode){
+  _authMode = mode;
+  document.querySelectorAll('.auth-tab').forEach((t,i) =>
+    t.classList.toggle('active', (i===0 && mode==='signin') || (i===1 && mode==='signup')));
+  document.getElementById('auth-submit').textContent = mode==='signin' ? 'Sign In' : 'Create Account';
+  const e = document.getElementById('auth-error');
+  e.textContent = ''; e.className = '';
+}
+
+async function submitAuth(){
+  if(!_supabase) return;
+  const email = document.getElementById('auth-email').value.trim();
+  const password = document.getElementById('auth-password').value;
+  const errEl = document.getElementById('auth-error');
+  const btn = document.getElementById('auth-submit');
+
+  errEl.className = ''; errEl.textContent = '';
+  if(!email || !password){ errEl.textContent = 'Email and password are required.'; return; }
+
+  btn.disabled = true; btn.textContent = '…';
+
+  const { error } = _authMode === 'signup'
+    ? await _supabase.auth.signUp({ email, password })
+    : await _supabase.auth.signInWithPassword({ email, password });
+
+  btn.disabled = false;
+  btn.textContent = _authMode === 'signin' ? 'Sign In' : 'Create Account';
+
+  if(error){ errEl.textContent = error.message; return; }
+  if(_authMode === 'signup'){
+    errEl.className = 'ok';
+    errEl.textContent = 'Check your email to confirm your account.';
+  }
+}
+
+async function signInWithGoogle(){
+  if(!_supabase) return;
+  await _supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: window.location.origin }
+  });
+}
+
+async function signOut(){
+  if(!_supabase) return;
+  await _supabase.auth.signOut();
+}
+
+async function getAccessToken(){
+  if(!_supabase) return null;
+  const { data: { session } } = await _supabase.auth.getSession();
+  return session?.access_token || null;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
    INIT
 ═══════════════════════════════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
-  renderHistoryList();
+  initAuth();
   document.getElementById('ticker-input').addEventListener('keydown', e => {
     if(e.key === 'Enter'){ e.preventDefault(); fetchStock(); }
   });
