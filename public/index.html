@@ -616,8 +616,12 @@ function renderHistoryList(){
 
 function loadFromHistory(i){
   _reportJSON = history_[i].raw;
+  _livePrice = null;
   switchTab('data');
   renderReport();
+  // fetch fresh price in background, apply to DOM when ready
+  const ticker = JSON.parse(history_[i].raw).ticker;
+  fetchLivePrice(ticker).then(applyLivePriceToDOM);
 }
 
 function deleteHistory(e, i){
@@ -625,6 +629,34 @@ function deleteHistory(e, i){
   history_.splice(i, 1);
   localStorage.setItem('srr_history', JSON.stringify(history_));
   renderHistoryList();
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   LIVE PRICE
+═══════════════════════════════════════════════════════════════════ */
+let _livePrice = null;
+
+async function fetchLivePrice(ticker){
+  try {
+    const res = await fetch(`/api/price?ticker=${encodeURIComponent(ticker)}`);
+    if(res.ok){
+      const data = await res.json();
+      if(!data.error) _livePrice = data;
+    }
+  } catch {}
+}
+
+function applyLivePriceToDOM(){
+  if(!_livePrice) return;
+  const priceEl = document.getElementById('rp-price');
+  const subEl   = document.getElementById('rp-price-sub');
+  const w52El   = document.getElementById('rp-w52');
+  if(priceEl) priceEl.textContent = _livePrice.priceFormatted;
+  if(subEl){
+    subEl.textContent = _livePrice.changePctFormatted + ' today';
+    subEl.style.color = _livePrice.isNeg ? 'var(--red)' : 'var(--green)';
+  }
+  if(w52El) w52El.textContent = _livePrice.week52Formatted;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -645,9 +677,11 @@ async function fetchStock(){
   btn.disabled = true;
   btn.textContent = '…';
   _reportJSON = '';
+  _livePrice = null;
 
   hideStatus();
   showLoadingState(ticker);
+  fetchLivePrice(ticker); // runs in parallel — resolves long before Claude finishes
 
   try {
     const response = await fetch('/api/fetch', {
@@ -910,6 +944,14 @@ function renderReport(){
   let d;
   try{ d = JSON.parse(raw); } catch(e){ showStatus('Parse Error', e.message, 'error', 100); return; }
 
+  // Overlay live price data when available (main fetch: already resolved; history: Claude's values used as fallback)
+  if(_livePrice){
+    d.price         = _livePrice.priceFormatted;
+    d.priceIsNeg    = _livePrice.isNeg;
+    d.priceChangeSub = _livePrice.changePctFormatted + ' today';
+    d.week52        = _livePrice.week52Formatted;
+  }
+
   const col = d.accentColor || '#ffffff';
   const grad = d.accentGradient || `linear-gradient(135deg,${col},${col})`;
 
@@ -1000,7 +1042,7 @@ function renderReport(){
       ${(d.sector||'').split('·')[1] ? `<div class="co-industry">${(d.sector||'').split('·')[1].trim()}</div>` : ''}
     </div>
     <div class="sbdiv"></div>
-    <div class="bst"><div class="bst-v" style="font-family:var(--mono);font-size:11px">${d.week52}</div><div class="bst-l">52W Range</div></div>
+    <div class="bst"><div class="bst-v" id="rp-w52" style="font-family:var(--mono);font-size:11px">${d.week52}</div><div class="bst-l">52W Range</div></div>
     <div class="sbdiv"></div>
     <div class="bst"><div class="bst-v">${d.marketCap}</div><div class="bst-l">Market Cap</div></div>
     <div class="sbdiv"></div>
@@ -1012,8 +1054,8 @@ function renderReport(){
     </div>
     <div class="sbdiv"></div>
     <div class="price-block">
-      <div class="price-big">${d.price}</div>
-      <div class="price-sub" style="color:${d.priceIsNeg?'var(--red)':'var(--green)'}">${d.priceChangeSub}</div>
+      <div class="price-big" id="rp-price">${d.price}</div>
+      <div class="price-sub" id="rp-price-sub" style="color:${d.priceIsNeg?'var(--red)':'var(--green)'}">${d.priceChangeSub}</div>
     </div>
   </div>
 
