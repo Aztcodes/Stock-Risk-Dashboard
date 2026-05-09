@@ -16,10 +16,13 @@ CRITICAL RULES:
   Growth (0-30): 25-30 = accelerating revenue + earnings growth with durable moat; 15-24 = steady growth; 5-14 = slowing or inconsistent; 0-4 = declining
   Do NOT anchor to category ranges. Let the actual data drive each sub-score. Two mega-caps with different valuations must receive meaningfully different scores.
 - chart.prices: array of exactly 13 numbers representing monthly close prices, ending with today's price
+- chart.markers: ONLY include events that occurred within the 13-month chart window (the past 13 months from today). Do NOT include events from before this window — no matter how significant. Verify every marker date against your web search results; never use training data dates for markers.
 - cards: exactly 9 objects — 3 with section "Valuation", 3 with section "Financial Health", 3 with section "Growth"
 - quarterlyRows: 3-4 objects; the LAST one must have isPending:true for the upcoming quarter
 - All string values must be properly JSON-escaped
 - fetchedAt: set to today's ISO date string
+- PE ratio: if trailing PE is above 200x due to near-zero positive earnings, display as ">200x" rather than the exact inflated multiple. Negative PE (company lost money) should be shown as-is (e.g. "-203x") since it conveys real information
+- All specific dates, prices, and figures MUST come from your web search results. Training data dates can be off by 1–2 years — always prefer and verify against web search results
 
 SCHEMA (every field is required unless marked optional):
 {
