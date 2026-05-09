@@ -10,14 +10,18 @@ A web-based dashboard that generates structured 2-page risk reports for individu
 
 ## Architecture (Current)
 
-- **Frontend:** `public/index.html` — single-file, dark UI, two-page report toggle (Overview / Earnings & Outlook), inline SVG chart and gauge, sidebar with Data / History tabs; Quick Picks 3×3 grid
-- **Backend:** `api/fetch.js` — Vercel Edge Runtime serverless function, streams response back to client
+- **Frontend:** `public/index.html` — single-file, dark UI, two-page report toggle (Overview / Earnings & Outlook), inline SVG chart and gauge, sidebar with Data / History tabs; Quick Picks 3×3 grid; mobile-responsive off-canvas drawer
+- **Backend:** `api/fetch.js` — Vercel Edge Runtime serverless function, streams response back to client; auth-gated, rate-limited (10/hr/user)
 - **Price:** `api/price.js` — Edge function fetching live price, daily % change, and 52W range from Yahoo Finance v8 chart API; called in parallel with Claude, resolves in ~1–2s
+- **Share:** `api/share.js` — auth-gated Edge function; saves report JSON to `shared_reports` table with a 10-char hash; public viewer at `/r/:hash` via `public/share.html`
+- **Config:** `api/config.js` — returns Supabase URL + anon key to frontend (safe to expose)
 - **API:** Anthropic `claude-sonnet-4-6` with `web_search_20250305` tool (max_uses: 4), prompt caching on system prompt
 - **API key:** Server-side only (`process.env.ANTHROPIC_API_KEY`) — not user-supplied
-- **History:** Currently in `localStorage` as `srr_history` — to be migrated to user account in Batch 3
+- **Auth:** Supabase (email + Google OAuth); JWT tokens verified server-side on protected routes
+- **DB:** Supabase PostgreSQL — `reports` (history), `fetch_log` (rate limiting), `shared_reports` (public share links); all with RLS
+- **History:** Stored in Supabase `reports` table per user; one-time migration from `localStorage` on first login
 - **Hosting:** Vercel (free Hobby tier), domain is `*.vercel.app` for now
-- **Auth:** Supabase (email + Google OAuth) — implemented in Batch 2
+- **Legal:** `public/terms.html`, `public/privacy.html` — linked from auth screen, sidebar, and report footer
 
 **Cost per report:** ~$0.20–0.40 (4 web searches + accumulated input tokens + JSON output). This informs the Stage 3 free tier design — free tier should be capped at reports per month, not per day.
 
@@ -29,51 +33,45 @@ Single-file BYOK HTML product (`StockRiskDashboard_v2_1.html`). No server, no au
 
 ---
 
-## Stage 2 — Hosted Multi-User App
+## Stage 2 — Hosted Multi-User App ✅ COMPLETE
 
-**Target:** End May 2026  
+**Launched:** May 2026  
 **Goal:** 5+ friends/family using it weekly within 14 days of launch
 
 ### Batch 1 — Quick Wins ✅ DONE
 - API key UI removed from frontend (was vestigial after moving to server-side key)
 - Cost optimisation assessed; decided to maintain current fetch settings (max_uses: 4, max_tokens: 8000) to preserve report quality
 
-### Batch 2 — Auth (foundational dependency)
-Everything downstream requires a user identity. Nothing in Batches 3 or 5 can start until this is done.
+### Batch 2 — Auth ✅ DONE
+- Supabase email + Google OAuth sign-in screen
+- `/api/fetch` route protected — unauthenticated requests rejected (401)
+- Sign-out button in sidebar header
+- `api/config.js` Edge endpoint returns Supabase URL + anon key safely to frontend
 
-- **Provider: Supabase** (chosen over Clerk — provides auth + PostgreSQL in one service, eliminating the need for a separate database)
-- Email + Google OAuth sign-in
-- Protect the `/api/fetch` route — unauthenticated requests should be rejected
+### Batch 3 — DB + Rate Limiting + History Migration ✅ DONE
+- Supabase tables: `reports` (history), `fetch_log` (rate limiting)
+- History migrated from `localStorage` → user account in DB; one-time migration on first login
+- Rate limiting: max 10 fetches/hour/user enforced server-side in `api/fetch.js`
+- Row Level Security (RLS) policies: users can only access their own data
 
-### Batch 3 — DB + Rate Limiting + History Migration
-All three share the same Supabase database and all depend on Batch 2 auth being in place.
+### Batch 4 — Mobile Responsive ✅ DONE
+- Fixed top header bar (52px) with AZTIC brand + hamburger on mobile
+- Sidebar becomes off-canvas drawer (slides in from left, closes on fetch or overlay tap)
+- Report grids reflow: cards 1-col, KPI strip 4-col (2 rows), p2/dual 1-col, earnings 2×2
+- Tablet breakpoint (769–1024px): sidebar 300px, cards 2-col
 
-- Set up Supabase DB schema (users, reports/history, fetch rate tracking)
-- Migrate history from `localStorage` → user account in DB
-- Enforce rate limiting server-side in `api/fetch.js` (max 10 fetches/hour/user)
+### Batch 5 — Share Links ✅ DONE
+- `api/share.js`: auth-gated Edge function, generates 10-char hash, saves report JSON to `shared_reports` table
+- `public/share.html`: public read-only viewer — fetches from Supabase REST (no auth), renders full 2-page report
+- `vercel.json`: rewrites `/r/:hash` → `share.html`
+- Share button in floating actions; modal with copyable URL; hash cached per session
 
-### Batch 4 — Mobile Responsive
-Independent of auth/DB — pure frontend CSS work. Can be done in parallel with any other batch.
+### Batch 6 — Legal Pages ✅ DONE
+- `public/terms.html` — Terms of Service (not-financial-advice callout, acceptable use, liability cap)
+- `public/privacy.html` — Privacy Policy (data collected, third parties, retention, user rights)
+- Links wired into auth screen footer, sidebar footer, and report page footer
 
-- Sidebar collapses into a drawer on mobile
-- Touch-friendly interactions
-- `@media` breakpoints added (currently none exist)
-
-### Batch 5 — Share Links
-Depends on Batch 3 (DB must exist to store reports against a hash).
-
-- Save rendered report to DB with a unique hash
-- Serve at `/r/<ticker>/<hash>` as a public, read-only view
-
-### Batch 6 — Legal Pages
-Fully independent. Must be live before sharing beyond close friends.
-
-- Terms of Service
-- Privacy Policy
-- "Not financial advice" disclaimer page
-
-**Critical path: 1 → 2 → 3 → 5**  
-Batches 4 and 6 can slot in alongside any of the above without blocking anything.
+**All batches shipped. Stage 2 complete.**
 
 ---
 
