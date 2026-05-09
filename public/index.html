@@ -432,15 +432,15 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:1
     <div id="quick-picks">
       <div class="fp-label">Quick Picks</div>
       <div class="qp-grid">
-        <button class="qp-btn" onclick="quickFetch('MSFT')">MSFT</button>
-        <button class="qp-btn" onclick="quickFetch('META')">META</button>
-        <button class="qp-btn" onclick="quickFetch('NVDA')">NVDA</button>
         <button class="qp-btn" onclick="quickFetch('AAPL')">AAPL</button>
-        <button class="qp-btn" onclick="quickFetch('TSLA')">TSLA</button>
+        <button class="qp-btn" onclick="quickFetch('NVDA')">NVDA</button>
+        <button class="qp-btn" onclick="quickFetch('MSFT')">MSFT</button>
         <button class="qp-btn" onclick="quickFetch('GOOGL')">GOOGL</button>
         <button class="qp-btn" onclick="quickFetch('AMZN')">AMZN</button>
-        <button class="qp-btn" onclick="quickFetch('CRM')">CRM</button>
-        <button class="qp-btn" onclick="quickFetch('OKLO')">OKLO</button>
+        <button class="qp-btn" onclick="quickFetch('META')">META</button>
+        <button class="qp-btn" onclick="quickFetch('TSLA')">TSLA</button>
+        <button class="qp-btn" onclick="quickFetch('AVGO')">AVGO</button>
+        <button class="qp-btn" onclick="quickFetch('TSM')">TSM</button>
       </div>
     </div>
 
@@ -897,8 +897,8 @@ function buildChart(chart, col){
     const yy = PT + frac*(H-PT-PB);
     const pv = Math.round(mx - (mx-mn)*frac);
     const lbl = pv >= 1000 ? (pv/1000).toFixed(1)+'k' : pv;
-    grid += `<line x1="${PL}" y1="${yy.toFixed(1)}" x2="${W}" y2="${yy.toFixed(1)}" stroke="#1e2230" stroke-width="1"/>`;
-    grid += `<text x="0" y="${(yy+3).toFixed(1)}" fill="#3a3f55" font-family="IBM Plex Mono" font-size="10">$${lbl}</text>`;
+    grid += `<line x1="${PL}" y1="${yy.toFixed(1)}" x2="${W}" y2="${yy.toFixed(1)}" stroke="#252c40" stroke-width="1"/>`;
+    grid += `<text x="0" y="${(yy+3).toFixed(1)}" fill="#5a6285" font-family="IBM Plex Mono" font-size="10">$${lbl}</text>`;
   }
 
   const pts = xs.map((x,i) => `${x.toFixed(1)},${ys[i].toFixed(1)}`).join(' ');
@@ -965,7 +965,7 @@ function buildChart(chart, col){
   xs.forEach((x,i) => {
     const m = months[i] || '';
     const last = i === lastIdx;
-    xlbls += `<text x="${x.toFixed(1)}" y="${H+2}" fill="${last?c:'#3a3f55'}" font-family="IBM Plex Mono" font-size="10" text-anchor="middle" ${last?'font-weight="bold"':''}>${m}</text>`;
+    xlbls += `<text x="${x.toFixed(1)}" y="${H+2}" fill="${last?c:'#5a6285'}" font-family="IBM Plex Mono" font-size="10" text-anchor="middle" ${last?'font-weight="bold"':''}>${m}</text>`;
   });
 
   // Always show current price label next to the dot — markers no longer compete for this space
