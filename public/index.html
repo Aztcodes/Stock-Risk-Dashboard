@@ -360,6 +360,61 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:1
 /* sign-out button in sidebar header */
 .sh-signout{background:none;border:1px solid var(--border);border-radius:4px;color:var(--dim);cursor:pointer;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:0.5px;padding:4px 8px;transition:all .15s;}
 .sh-signout:hover{border-color:var(--border2);color:var(--muted);}
+
+/* ─── MOBILE RESPONSIVE ──────────────────────────────────────────── */
+#mobile-header{display:none;position:fixed;top:0;left:0;right:0;height:52px;background:var(--bg4);border-bottom:1px solid var(--border);z-index:200;align-items:center;justify-content:space-between;padding:0 14px;}
+.mh-brand{font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:3px;color:var(--text);}
+#menu-btn{background:none;border:1px solid var(--border);border-radius:6px;color:var(--text);cursor:pointer;padding:8px 10px;display:flex;align-items:center;justify-content:center;transition:background .15s;}
+#menu-btn:hover{background:var(--bg3);}
+#sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:299;}
+#sidebar-overlay.visible{display:block;}
+
+@media(max-width:768px){
+  #mobile-header{display:flex;}
+  #shell{display:block;padding-top:52px;}
+  #sidebar{position:fixed;top:52px;left:-340px;height:calc(100vh - 52px);z-index:300;transition:left .25s cubic-bezier(.4,0,.2,1);border-right:1px solid var(--border);}
+  #sidebar.open{left:0;box-shadow:8px 0 32px rgba(0,0,0,.6);}
+  #viewport{width:100%;min-height:calc(100vh - 52px);}
+  #report-wrap{padding:20px 16px;max-width:100%;}
+  .stock-bar{flex-wrap:wrap;gap:10px;}
+  .sbdiv{display:none;}
+  .price-block{margin-left:0;width:100%;border-top:1px solid var(--border2);padding-top:10px;}
+  .metric-row{grid-template-columns:1fr;}
+  .gauge-card{padding:16px;}
+  .kpi-strip{grid-template-columns:repeat(4,1fr);}
+  .kc:nth-child(4n){border-right:none;}
+  .kc:nth-child(n+5){border-top:1px solid var(--border);}
+  .cards-grid{grid-template-columns:1fr;}
+  .p2-grid{grid-template-columns:1fr;}
+  .dual-col{grid-template-columns:1fr;}
+  .eg{grid-template-columns:repeat(2,1fr);}
+  .page-tabs{width:100%;box-sizing:border-box;}
+  .page-nav-bottom{flex-direction:column;gap:10px;}
+  .pn-btn{width:100%;justify-content:center;}
+  #floating-actions{bottom:12px;right:12px;}
+  #print-btn,#copy-btn{padding:8px 12px;font-size:10px;}
+  #empty-state{padding:32px 16px;}
+  .es-logo{font-size:44px;}
+  .es-h{font-size:20px;}
+  .es-step{padding:12px 14px;}
+  .price-big{font-size:22px;}
+  .g-num{font-size:40px;}
+  .cval{font-size:22px;}
+  .bcard{overflow-x:auto;}
+  .ls-wrap{padding:40px 20px;}
+  .ls-spin-wrap{width:140px;height:140px;}
+  .ls-spin-ring{-webkit-mask:radial-gradient(circle at center,transparent 52px,black 54px);mask:radial-gradient(circle at center,transparent 52px,black 54px);}
+  .ls-spin-head{top:4px;transform-origin:4px 66px;}
+  .ls-pct{font-size:52px;}
+}
+@media(min-width:769px)and(max-width:1024px){
+  #sidebar{width:300px;min-width:300px;}
+  .cards-grid{grid-template-columns:repeat(2,1fr);}
+  .kpi-strip{grid-template-columns:repeat(4,1fr);}
+  .kc:nth-child(4n){border-right:none;}
+  .kc:nth-child(n+5){border-top:1px solid var(--border);}
+  .metric-row{grid-template-columns:280px 1fr;}
+}
 </style>
 </head>
 <body>
@@ -393,6 +448,16 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:1
 </div>
 
 <div id="shell" style="display:none">
+<!-- ══════════════════ MOBILE HEADER ══════════════════ -->
+<div id="mobile-header">
+  <button id="menu-btn" onclick="toggleSidebar()" title="Menu">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+  <div class="mh-brand">AZTIC</div>
+  <div style="width:40px"></div>
+</div>
+<div id="sidebar-overlay" onclick="closeSidebar()"></div>
+
 <!-- ══════════════════ SIDEBAR ══════════════════ -->
 <aside id="sidebar">
 
@@ -524,6 +589,21 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:1
 </div>
 
 <script>
+/* ═══════════════════════════════════════════════════════════════════
+   MOBILE SIDEBAR DRAWER
+═══════════════════════════════════════════════════════════════════ */
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.contains('open') ? closeSidebar() : openSidebar();
+}
+function openSidebar(){
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('sidebar-overlay').classList.add('visible');
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('visible');
+}
+
 /* ═══════════════════════════════════════════════════════════════════
    HISTORY MANAGEMENT
 ═══════════════════════════════════════════════════════════════════ */
@@ -803,6 +883,7 @@ let _reportJSON = '';
 
 function quickFetch(ticker){
   document.getElementById('ticker-input').value = ticker;
+  closeSidebar();
   fetchStock();
 }
 
@@ -818,6 +899,7 @@ async function fetchStock(){
 
   hideStatus();
   showLoadingState(ticker);
+  closeSidebar();
   fetchLivePrice(ticker); // runs in parallel — resolves long before Claude finishes
 
   try {
@@ -1450,7 +1532,7 @@ async function initAuth(){
 
 function showApp(session){
   document.getElementById('auth-screen').style.display = 'none';
-  document.getElementById('shell').style.display = 'flex';
+  document.getElementById('shell').style.display = '';  // let CSS handle flex vs block
   if(session) document.getElementById('auth-signout-btn').style.display = '';
   loadHistoryFromDB();
 }
