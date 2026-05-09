@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy · Aztic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#08090d;--bg2:#0e1018;--bg3:#141720;
+  --border:#1e2230;--border2:#262b3a;
+  --text:#e8eaf2;--muted:#6b7194;--dim:#3a3f55;
+  --red:#ef4444;--amber:#f59e0b;--green:#22c55e;
+  --mono:'JetBrains Mono',monospace;
+  --body:'DM Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:14px;-webkit-font-smoothing:antialiased;}
+body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:100vh;line-height:1.7;}
+
+.page{max-width:720px;margin:0 auto;padding:60px 28px 100px;}
+
+.back{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:0.5px;color:var(--muted);text-decoration:none;border:1px solid var(--border);border-radius:5px;padding:6px 12px;margin-bottom:48px;transition:all .15s;}
+.back:hover{border-color:var(--border2);color:var(--text);}
+
+.brand{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:4px;color:var(--dim);margin-bottom:10px;}
+h1{font-family:var(--body);font-size:32px;font-weight:700;color:var(--text);margin-bottom:8px;}
+.meta{font-family:var(--mono);font-size:10px;color:var(--dim);margin-bottom:40px;}
+
+h2{font-size:15px;font-weight:700;color:var(--text);margin:40px 0 10px;font-family:var(--body);}
+p{font-size:13px;color:#b0b5cc;line-height:1.85;margin-bottom:12px;}
+ul{margin:10px 0 12px 20px;}
+li{font-size:13px;color:#b0b5cc;line-height:1.85;margin-bottom:4px;}
+strong{color:var(--text);}
+a{color:var(--muted);text-decoration:underline;text-underline-offset:3px;}
+a:hover{color:var(--text);}
+
+.data-table{width:100%;border-collapse:collapse;margin:14px 0 20px;font-size:12px;}
+.data-table th{text-align:left;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;padding:8px 12px;border-bottom:1px solid var(--border);}
+.data-table td{padding:10px 12px;border-bottom:1px solid var(--border);color:#b0b5cc;vertical-align:top;line-height:1.6;}
+.data-table tr:last-child td{border-bottom:none;}
+.data-table td:first-child{font-family:var(--mono);font-size:11px;color:var(--text);font-weight:600;white-space:nowrap;}
+
+hr{border:none;border-top:1px solid var(--border);margin:36px 0;}
+
+.footer{display:flex;justify-content:space-between;align-items:center;margin-top:60px;padding-top:20px;border-top:1px solid var(--border);font-family:var(--mono);font-size:9px;color:var(--dim);}
+.footer-links{display:flex;gap:16px;}
+.footer-links a{color:var(--dim);text-decoration:none;}
+.footer-links a:hover{color:var(--muted);}
+</style>
+</head>
+<body>
+<div class="page">
+  <a href="/" class="back">← Back to Aztic</a>
+
+  <div class="brand">AZTIC</div>
+  <h1>Privacy Policy</h1>
+  <div class="meta">Last updated: 9 May 2026 &nbsp;·&nbsp; Version 1.0</div>
+
+  <p>Aztic is a private beta product. We collect the minimum data necessary to run the service and never sell your data. This policy explains what we collect, why, and how.</p>
+
+  <h2>1. Data We Collect</h2>
+  <table class="data-table">
+    <thead>
+      <tr><th>Data</th><th>Why we collect it</th><th>Stored where</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Email address</td>
+        <td>Authentication and account identification</td>
+        <td>Supabase (auth)</td>
+      </tr>
+      <tr>
+        <td>Google profile (name, email, avatar)</td>
+        <td>If you sign in with Google — used for authentication only</td>
+        <td>Supabase (auth)</td>
+      </tr>
+      <tr>
+        <td>Report history</td>
+        <td>So you can revisit reports you've generated</td>
+        <td>Supabase (database)</td>
+      </tr>
+      <tr>
+        <td>Fetch log timestamps</td>
+        <td>Rate limiting — counting how many reports you've run per hour</td>
+        <td>Supabase (database)</td>
+      </tr>
+      <tr>
+        <td>Tickers you search</td>
+        <td>Passed to Anthropic API to generate your report; not stored separately beyond report history</td>
+        <td>Anthropic API (transient)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>We do not collect passwords in plaintext, payment information (not applicable in beta), or any data beyond the above.</p>
+
+  <h2>2. How We Use Your Data</h2>
+  <ul>
+    <li><strong>Authentication:</strong> Your email identifies your account and lets you sign in.</li>
+    <li><strong>Report history:</strong> Stored so you can revisit previous reports in the History tab.</li>
+    <li><strong>Rate limiting:</strong> Fetch log timestamps are counted to enforce per-hour limits and prevent abuse.</li>
+    <li>We do <strong>not</strong> use your data for advertising, profiling, or sale to third parties.</li>
+  </ul>
+
+  <h2>3. Third-Party Services</h2>
+  <p>Aztic is built on these third-party services, each with their own privacy policies:</p>
+  <ul>
+    <li><strong>Anthropic</strong> — processes your ticker queries via the Claude API to generate reports. Anthropic may log API requests per their <a href="https://www.anthropic.com/privacy" target="_blank" rel="noopener">Privacy Policy</a>.</li>
+    <li><strong>Supabase</strong> — hosts authentication and the database that stores your account data and report history. See <a href="https://supabase.com/privacy" target="_blank" rel="noopener">Supabase Privacy Policy</a>.</li>
+    <li><strong>Vercel</strong> — hosts and serves the Aztic application. Vercel may log request metadata (IP address, browser type). See <a href="https://vercel.com/legal/privacy-policy" target="_blank" rel="noopener">Vercel Privacy Policy</a>.</li>
+    <li><strong>Google</strong> — if you use "Continue with Google", Google OAuth handles authentication. See <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google Privacy Policy</a>.</li>
+  </ul>
+
+  <h2>4. Data Retention</h2>
+  <p>Your report history is retained until you delete it (via the History tab) or request account deletion. Fetch log entries are retained for rolling 30-day windows for rate limiting purposes and then purged.</p>
+  <p>If you delete your account, all associated data is deleted from our database within 30 days.</p>
+
+  <h2>5. Your Rights</h2>
+  <p>You can:</p>
+  <ul>
+    <li><strong>Delete individual reports</strong> — use the delete button in the History tab at any time.</li>
+    <li><strong>Delete all your data</strong> — use the "Clear all" option in the History tab.</li>
+    <li><strong>Request account deletion</strong> — email us and we will delete your account and all associated data within 30 days.</li>
+    <li><strong>Request a copy of your data</strong> — email us and we will provide a summary of data we hold about you.</li>
+  </ul>
+
+  <h2>6. Security</h2>
+  <p>Your API calls are authenticated with short-lived JWT tokens issued by Supabase. We do not store your password in plaintext — authentication is handled entirely by Supabase. Row-level security policies in our database ensure you can only access your own data.</p>
+  <p>No security is perfect. We take reasonable steps to protect your data but cannot guarantee against all possible breaches.</p>
+
+  <h2>7. Children</h2>
+  <p>Aztic is not intended for users under the age of 18. We do not knowingly collect data from minors. If you believe we have collected data from a minor, contact us and we will delete it.</p>
+
+  <h2>8. Changes to This Policy</h2>
+  <p>We may update this Privacy Policy from time to time. We will post the updated policy with a new "Last updated" date. Continued use of the Service after changes constitutes acceptance of the updated policy.</p>
+
+  <h2>9. Contact</h2>
+  <p>For privacy questions or data requests, email us at <a href="mailto:joshua.ang@hotmail.my">joshua.ang@hotmail.my</a>. We aim to respond within 14 days.</p>
+
+  <div class="footer">
+    <span>© 2026 Aztic</span>
+    <div class="footer-links">
+      <a href="/terms.html">Terms of Service</a>
+      <a href="/privacy.html">Privacy Policy</a>
+    </div>
+  </div>
+</div>
+</body>
+</html>
