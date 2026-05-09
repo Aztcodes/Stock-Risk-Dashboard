@@ -98,9 +98,15 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:1
 
 /* ─── LOADING STATE ──────────────────────────────────────────────────── */
 #loading-state{display:none;align-items:center;justify-content:center;min-height:85vh;}
-.ls-wrap{text-align:center;display:flex;flex-direction:column;align-items:center;gap:18px;max-width:440px;width:100%;padding:40px;}
-.ls-brand{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:4px;color:var(--dim);text-transform:uppercase;animation:lsPulse 2.4s ease-in-out infinite;}
+.ls-wrap{text-align:center;display:flex;flex-direction:column;align-items:center;gap:22px;max-width:440px;width:100%;padding:40px;}
+.ls-brand{font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:6px;color:var(--text);text-transform:uppercase;animation:lsPulse 1.8s ease-in-out infinite;}
+@keyframes lsPulse{0%,100%{opacity:.1;transform:scale(0.95);}50%{opacity:1;transform:scale(1.05);}}
+.ls-spin-wrap{position:relative;display:flex;align-items:center;justify-content:center;width:130px;height:130px;}
+.ls-spin-track{position:absolute;inset:0;border-radius:50%;border:1px solid var(--border);}
+.ls-spin-ring{position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 0deg,transparent 0%,transparent 55%,rgba(232,234,242,.06) 68%,rgba(232,234,242,.18) 79%,rgba(232,234,242,.55) 90%,rgba(232,234,242,.9) 97%,rgba(232,234,242,1) 100%);-webkit-mask:radial-gradient(circle at center,transparent 49px,black 51px);mask:radial-gradient(circle at center,transparent 49px,black 51px);animation:lsSpin 1.6s cubic-bezier(0.4,0,0.2,1) infinite;}
+.ls-spin-head{position:absolute;width:8px;height:8px;border-radius:50%;background:#fff;box-shadow:0 0 8px 2px rgba(255,255,255,.65);top:4px;left:calc(50% - 4px);transform-origin:4px 61px;animation:lsSpin 1.6s cubic-bezier(0.4,0,0.2,1) infinite;}
 .ls-ticker-lbl{font-family:var(--mono);font-size:22px;font-weight:700;letter-spacing:2px;color:var(--text);}
+@keyframes lsSpin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
 .ls-pct-wrap{display:flex;align-items:flex-start;justify-content:center;gap:3px;line-height:1;}
 .ls-pct{font-family:var(--mono);font-size:80px;font-weight:700;line-height:1;color:var(--text);}
 .ls-pct-sym{font-family:var(--mono);font-size:28px;font-weight:600;color:var(--muted);margin-top:10px;}
@@ -108,12 +114,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:1
 .ls-line.fade{opacity:0;}
 .ls-bar-wrap{width:100%;max-width:300px;height:2px;background:var(--border);border-radius:1px;overflow:hidden;}
 .ls-bar-fill{height:100%;background:var(--text);border-radius:1px;width:0%;transition:width .6s ease;}
-.ls-dots{display:flex;gap:6px;margin-top:4px;}
-.ls-dot{width:5px;height:5px;border-radius:50%;background:var(--border2);animation:lsDot 1.4s ease-in-out infinite;}
-.ls-dot:nth-child(2){animation-delay:.2s;}
-.ls-dot:nth-child(3){animation-delay:.4s;}
-@keyframes lsPulse{0%,100%{opacity:.4;}50%{opacity:1;}}
-@keyframes lsDot{0%,80%,100%{transform:scale(1);background:var(--border2);}40%{transform:scale(1.4);background:var(--muted);}}
 
 /* ─── EMPTY STATE ────────────────────────────────────────────────────── */
 #empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:85vh;text-align:center;padding:48px 40px;gap:20px;max-width:680px;margin:0 auto;}
@@ -492,18 +492,18 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:1
   <div id="loading-state">
     <div class="ls-wrap">
       <div class="ls-brand">Aztic</div>
-      <div class="ls-ticker-lbl" id="ls-ticker"></div>
+      <div class="ls-spin-wrap">
+        <div class="ls-spin-track"></div>
+        <div class="ls-spin-ring"></div>
+        <div class="ls-spin-head"></div>
+        <div class="ls-ticker-lbl" id="ls-ticker"></div>
+      </div>
       <div class="ls-pct-wrap">
         <div class="ls-pct" id="ls-pct">0</div>
         <div class="ls-pct-sym">%</div>
       </div>
       <div class="ls-line" id="ls-line">Initialising…</div>
       <div class="ls-bar-wrap"><div class="ls-bar-fill" id="ls-bar-fill"></div></div>
-      <div class="ls-dots">
-        <div class="ls-dot"></div>
-        <div class="ls-dot"></div>
-        <div class="ls-dot"></div>
-      </div>
     </div>
   </div>
 
@@ -953,9 +953,9 @@ function buildChart(chart, col){
 
     placedLabels.push({x: xPos, yTop: Math.min(baseY, subY) - 2, yBot: Math.max(baseY, subY) + 2});
 
-    markers += `<text x="${xPos.toFixed(1)}" y="${baseY.toFixed(1)}" fill="${mc}" font-family="IBM Plex Mono" font-size="9" font-weight="600" text-anchor="${textAnchor}">${mk.label}</text>`;
+    markers += `<text x="${xPos.toFixed(1)}" y="${baseY.toFixed(1)}" fill="${mc}" font-family="IBM Plex Mono" font-size="8" font-weight="600" text-anchor="${textAnchor}">${mk.label}</text>`;
     if(mk.sublabel) {
-      markers += `<text x="${xPos.toFixed(1)}" y="${subY.toFixed(1)}" fill="${mc}" font-family="IBM Plex Mono" font-size="8" text-anchor="${textAnchor}" opacity="0.8">${mk.sublabel}</text>`;
+      markers += `<text x="${xPos.toFixed(1)}" y="${subY.toFixed(1)}" fill="${mc}" font-family="IBM Plex Mono" font-size="7" text-anchor="${textAnchor}" opacity="0.8">${mk.sublabel}</text>`;
     }
   });
 
@@ -963,7 +963,7 @@ function buildChart(chart, col){
   const months = chart.months || [];
   let xlbls = '';
   xs.forEach((x,i) => {
-    const m = months[i] || '';
+    const m = (months[i] || '').replace(/\s+/g, '');
     const last = i === lastIdx;
     xlbls += `<text x="${x.toFixed(1)}" y="${H+2}" fill="${last?c:'#5a6285'}" font-family="IBM Plex Mono" font-size="10" text-anchor="middle" ${last?'font-weight="bold"':''}>${m}</text>`;
   });
