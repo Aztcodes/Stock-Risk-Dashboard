@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aztic · Shared Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ─── TOKENS ─────────────────────────────────────────────────────────── */
+:root {
+  --bg:#08090d; --bg2:#0e1018; --bg3:#141720; --bg4:#09090e;
+  --border:#1e2230; --border2:#262b3a; --border3:#2e3450;
+  --text:#e8eaf2; --muted:#6b7194; --dim:#3a3f55;
+  --green:#22c55e; --green-dim:#16a34a1a;
+  --red:#ef4444;   --red-dim:#dc26261a;
+  --amber:#f59e0b; --amber-dim:#d977061a;
+  --blue:#3b82f6;  --blue-dim:#1d4ed81a;
+  --mono:'JetBrains Mono',monospace;
+  --body:'DM Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:14px;-webkit-font-smoothing:antialiased;}
+body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:100vh;overflow-x:hidden;}
+
+/* ─── SHARE HEADER ───────────────────────────────────────────────────── */
+#share-header{background:var(--bg4);border-bottom:1px solid var(--border);padding:12px clamp(16px,3vw,40px);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+.sh-brand{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:3px;color:var(--text);}
+.sh-badge{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;color:var(--muted);background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:3px 8px;margin-left:10px;}
+.sh-cta{background:var(--text);color:var(--bg);border:none;cursor:pointer;font-family:var(--mono);font-size:10px;font-weight:700;padding:8px 14px;border-radius:6px;letter-spacing:0.5px;text-decoration:none;display:inline-block;transition:opacity .15s;}
+.sh-cta:hover{opacity:.85;}
+
+/* ─── VIEWPORT ───────────────────────────────────────────────────────── */
+#viewport{background:var(--bg);background-image:radial-gradient(circle at 60% 20%, #0ea5e908 0%, transparent 60%), radial-gradient(circle at 20% 80%, #4f8ef705 0%, transparent 50%);}
+#report-wrap{max-width:min(1760px, 96vw);margin:0 auto;padding:36px clamp(16px, 3vw, 56px);}
+
+/* ─── LOADING / ERROR ────────────────────────────────────────────────── */
+#state-wrap{display:flex;align-items:center;justify-content:center;min-height:70vh;text-align:center;padding:40px 20px;}
+.state-inner{max-width:400px;}
+.state-logo{font-family:var(--mono);font-size:48px;font-weight:700;color:var(--border2);margin-bottom:20px;}
+.state-title{font-size:22px;font-weight:600;color:var(--muted);margin-bottom:10px;}
+.state-sub{font-size:13px;color:var(--dim);line-height:1.8;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loader{display:inline-block;width:32px;height:32px;border:2px solid var(--border);border-top-color:var(--text);border-radius:50%;animation:spin .7s linear infinite;margin-bottom:20px;}
+
+/* ─── PAGE BREAK ─────────────────────────────────────────────────────── */
+.page-break{border:none;border-top:1px solid var(--border2);margin:44px 0;}
+
+/* ─── STOCK BAR ──────────────────────────────────────────────────────── */
+.stock-bar{display:flex;align-items:center;gap:16px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:15px 20px;margin-bottom:20px;position:relative;overflow:hidden;}
+.stock-bar::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--ticker-color,#fff);}
+.ticker-badge{color:#fff;font-family:var(--mono);font-weight:700;font-size:16px;padding:7px 14px;border-radius:7px;letter-spacing:1px;flex-shrink:0;background:var(--ticker-gradient,#333);}
+.co-name{font-size:17px;font-weight:700;}
+.co-meta{font-size:11px;color:var(--muted);margin-top:3px;}
+.co-industry{font-size:10px;color:var(--dim);margin-top:2px;font-family:var(--mono);}
+.co-block{min-width:0;flex-shrink:1;}
+.price-block{margin-left:auto;text-align:right;}
+.price-big{font-family:var(--mono);font-size:28px;font-weight:700;}
+.price-sub{font-family:var(--mono);font-size:11px;margin-top:3px;}
+.sbdiv{width:1px;height:38px;background:var(--border2);flex-shrink:0;}
+.bst{text-align:center;flex-shrink:0;}
+.bst-v{font-family:var(--mono);font-size:14px;font-weight:600;}
+.bst-l{font-size:10px;color:var(--muted);margin-top:3px;}
+.rating-pill{font-family:var(--mono);font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;letter-spacing:0.5px;border:1px solid;display:inline-block;}
+.data-freshness{font-family:var(--mono);font-size:11px;padding:10px 16px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--muted);margin-bottom:20px;display:flex;align-items:center;gap:9px;}
+.freshness-dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0;}
+
+/* ─── TOP ROW: GAUGE + SCORE ─────────────────────────────────────────── */
+.metric-row{display:grid;grid-template-columns:320px 1fr;gap:18px;margin-bottom:18px;}
+.gauge-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:22px 16px;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.g-lbl{font-size:11px;font-weight:700;letter-spacing:1.5px;color:#9298b8;text-transform:uppercase;margin-bottom:12px;}
+.g-num{font-family:var(--mono);font-size:52px;font-weight:700;line-height:1;margin-top:4px;}
+.g-rating{font-size:13px;font-weight:600;margin-top:5px;}
+.g-sub{font-size:11px;color:var(--muted);margin-top:4px;}
+.score-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:20px;}
+.chart-row{margin-bottom:22px;}
+.sc-hdr{font-size:11px;font-weight:700;letter-spacing:1.5px;color:#9298b8;text-transform:uppercase;margin-bottom:18px;}
+.sc-row{margin-bottom:18px;}.sc-row:last-child{margin-bottom:0;}
+.sc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;}
+.sc-name{font-size:14px;font-weight:600;}
+.sc-val{font-family:var(--mono);font-size:13px;color:#9298b8;}
+.sc-track{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;}
+.sc-fill{height:100%;border-radius:3px;}
+.sc-note{font-size:11px;color:#7a80a0;margin-top:5px;font-family:var(--mono);}
+
+/* ─── CHART ──────────────────────────────────────────────────────────── */
+.chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:20px;}
+.ch-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.ch-title{font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;}
+.ch-leg{display:flex;gap:14px;}
+.leg-i{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--muted);}
+.leg-d{width:7px;height:7px;border-radius:50%;}
+
+/* ─── KPI STRIP ──────────────────────────────────────────────────────── */
+.kpi-strip{display:grid;grid-template-columns:repeat(8,1fr);background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:22px;}
+.kc{padding:13px 16px;border-right:1px solid var(--border);}
+.kc:last-child{border-right:none;}
+.kv{font-family:var(--mono);font-size:15px;font-weight:600;}
+.kl{font-size:10px;color:var(--muted);margin-top:3px;}
+.ks{font-family:var(--mono);font-size:10px;margin-top:3px;}
+
+/* ─── SECTION LABEL ──────────────────────────────────────────────────── */
+.slbl{font-size:10px;font-weight:700;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:11px;display:flex;align-items:center;gap:8px;}
+.slbl::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* ─── CARDS ──────────────────────────────────────────────────────────── */
+.cards-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin-bottom:22px;}
+.kcard{border-radius:9px;padding:15px;border:1px solid;}
+.kcard.green{border-color:#22c55e44;background:var(--green-dim);}
+.kcard.red{border-color:#ef444444;background:var(--red-dim);}
+.kcard.amber{border-color:#f59e0b44;background:var(--amber-dim);}
+.cbadge{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;padding:2px 6px;border-radius:3px;text-transform:uppercase;margin-bottom:6px;display:inline-block;}
+.green .cbadge{background:#22c55e22;color:var(--green);}
+.red .cbadge{background:#ef444422;color:var(--red);}
+.amber .cbadge{background:#f59e0b22;color:var(--amber);}
+.cmet{font-size:13px;color:#9298b8;margin-bottom:3px;}
+.cval{font-family:var(--mono);font-size:26px;font-weight:700;}
+.csub{font-size:12px;color:#8a90b0;margin-top:5px;line-height:1.45;}
+.cvs{font-family:var(--mono);font-size:11px;margin-top:6px;}
+.green .cvs{color:#22c55e88;}.red .cvs{color:#ef444488;}.amber .cvs{color:#f59e0b88;}
+
+/* ─── PAGE 2 ─────────────────────────────────────────────────────────── */
+.p2-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:22px;}
+.dual-col{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:22px;}
+.bcard{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:20px;}
+.bc-title{font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:13px;display:flex;align-items:center;gap:7px;}
+.bc-title span{font-size:14px;}
+
+/* ─── TABLE ──────────────────────────────────────────────────────────── */
+.qtable{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px;}
+.qtable th{color:var(--muted);font-weight:600;font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:8px 12px;border-bottom:1px solid var(--border);text-align:left;}
+.qtable td{padding:10px 12px;border-bottom:1px solid var(--border);}
+.qtable tr:last-child td{border-bottom:none;}
+.qtable tr:hover td{background:var(--bg3);}
+.pos{color:var(--green);}.neg{color:var(--red);}.warn{color:var(--amber);}
+.itag{font-size:9px;font-weight:700;letter-spacing:0.5px;padding:2px 6px;border-radius:3px;text-transform:uppercase;font-family:var(--mono);}
+.t-beat{background:#22c55e22;color:var(--green);}.t-miss{background:#ef444422;color:var(--red);}
+.t-warn{background:#f59e0b22;color:var(--amber);}.t-pend{background:#ffffff11;color:var(--muted);}
+
+/* ─── LISTS ──────────────────────────────────────────────────────────── */
+.catlist,.risklist{list-style:none;}
+.catlist li,.risklist li{padding:9px 0;border-bottom:1px solid var(--border);font-size:13px;display:flex;align-items:flex-start;gap:10px;line-height:1.6;}
+.catlist li:last-child,.risklist li:last-child{border-bottom:none;}
+.ibull{color:var(--green);font-size:14px;flex-shrink:0;margin-top:1px;}
+.ibear{color:var(--red);font-size:14px;flex-shrink:0;margin-top:1px;}
+
+/* ─── EARNINGS ───────────────────────────────────────────────────────── */
+.eg{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:12px;}
+.ev{font-family:var(--mono);font-size:17px;font-weight:700;}
+.el{font-size:11px;color:var(--muted);margin-top:3px;}
+.eb{color:var(--green);font-family:var(--mono);font-size:10px;margin-top:3px;}
+.ew{color:var(--amber);font-family:var(--mono);font-size:10px;margin-top:3px;}
+.en{font-size:12px;color:var(--muted);margin-top:12px;line-height:1.7;border-top:1px solid var(--border);padding-top:12px;}
+
+/* ─── VERDICT ────────────────────────────────────────────────────────── */
+.verdict-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:22px;border-top:2px solid var(--v-color,#fff);}
+.rt{height:10px;background:linear-gradient(90deg,var(--red) 0%,var(--amber) 45%,var(--green) 100%);border-radius:5px;position:relative;}
+.rn{position:absolute;top:-5px;width:20px;height:20px;background:#fff;border-radius:50%;transform:translateX(-50%);border:3px solid;box-shadow:0 0 10px currentColor;}
+.rl{display:flex;justify-content:space-between;margin-top:7px;font-family:var(--mono);font-size:10px;color:var(--muted);}
+
+/* ─── FOOTER ─────────────────────────────────────────────────────────── */
+.rfooter{display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:10px;color:var(--muted);border-top:1px solid var(--border);padding-top:18px;margin-top:34px;opacity:0.75;}
+.share-footer{text-align:center;padding:40px 20px 20px;font-family:var(--mono);font-size:10px;color:var(--dim);}
+.share-footer a{color:var(--muted);text-decoration:none;}
+.share-footer a:hover{color:var(--text);}
+
+/* ─── PAGE TOGGLE ────────────────────────────────────────────────────── */
+.report-doc{position:relative;}
+.report-page-container{display:none;animation:fadeUp .35s ease both;}
+.report-page-container.active{display:block;}
+.page-tabs{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:24px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:8px;width:fit-content;margin-left:auto;margin-right:auto;}
+.page-tab{background:transparent;border:none;color:var(--muted);cursor:pointer;font-family:var(--mono);font-size:11px;font-weight:600;padding:7px 16px;border-radius:6px;letter-spacing:0.5px;transition:all .15s;display:flex;align-items:center;gap:7px;}
+.page-tab:hover{color:var(--text);}
+.page-tab.active{background:var(--bg3);color:var(--text);}
+.page-tab .pn{font-family:var(--mono);font-size:9px;font-weight:700;background:var(--bg);color:var(--muted);padding:2px 5px;border-radius:3px;letter-spacing:0;}
+.page-tab.active .pn{background:var(--text);color:var(--bg);}
+.page-nav-bottom{display:flex;align-items:center;justify-content:space-between;margin-top:24px;padding:14px 20px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;}
+.pn-btn{background:transparent;border:1px solid var(--border2);color:var(--muted);cursor:pointer;font-family:var(--mono);font-size:11px;font-weight:600;padding:9px 16px;border-radius:6px;letter-spacing:0.5px;transition:all .15s;display:flex;align-items:center;gap:8px;}
+.pn-btn:hover:not(:disabled){border-color:var(--text);color:var(--text);}
+.pn-btn:disabled{opacity:.3;cursor:not-allowed;}
+.pn-btn.primary{background:var(--text);color:var(--bg);border-color:var(--text);}
+.pn-btn.primary:hover{opacity:.85;}
+.pn-info{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.5px;}
+
+/* ─── ANIMATIONS ─────────────────────────────────────────────────────── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.report-page-container.active>*{animation:fadeUp .4s ease both;}
+.report-page-container.active>*:nth-child(1){animation-delay:.04s;}
+.report-page-container.active>*:nth-child(2){animation-delay:.08s;}
+.report-page-container.active>*:nth-child(3){animation-delay:.12s;}
+
+/* ─── NOISE ──────────────────────────────────────────────────────────── */
+.noise{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:0.022;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+
+/* scrollbars */
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+/* ─── MOBILE ─────────────────────────────────────────────────────────── */
+@media(max-width:768px){
+  #report-wrap{padding:20px 16px;}
+  .stock-bar{flex-wrap:wrap;gap:10px;}
+  .sbdiv{display:none;}
+  .price-block{margin-left:0;width:100%;border-top:1px solid var(--border2);padding-top:10px;}
+  .metric-row{grid-template-columns:1fr;}
+  .kpi-strip{grid-template-columns:repeat(4,1fr);}
+  .kc:nth-child(4n){border-right:none;}
+  .kc:nth-child(n+5){border-top:1px solid var(--border);}
+  .cards-grid{grid-template-columns:1fr;}
+  .p2-grid{grid-template-columns:1fr;}
+  .dual-col{grid-template-columns:1fr;}
+  .eg{grid-template-columns:repeat(2,1fr);}
+  .page-tabs{width:100%;box-sizing:border-box;}
+  .page-nav-bottom{flex-direction:column;gap:10px;}
+  .pn-btn{width:100%;justify-content:center;}
+  .price-big{font-size:22px;}
+  .g-num{font-size:40px;}
+  .cval{font-size:22px;}
+  .bcard{overflow-x:auto;}
+}
+</style>
+</head>
+<body>
+<div class="noise"></div>
+
+<div id="share-header">
+  <div style="display:flex;align-items:center;">
+    <span class="sh-brand">AZTIC</span>
+    <span class="sh-badge">SHARED REPORT</span>
+  </div>
+  <a href="/" class="sh-cta">Open Aztic →</a>
+</div>
+
+<div id="viewport">
+  <div id="state-wrap">
+    <div class="state-inner">
+      <div class="loader"></div>
+      <div class="state-title">Loading report…</div>
+    </div>
+  </div>
+  <div id="report-wrap" style="display:none"></div>
+  <div class="share-footer" id="share-footer" style="display:none">
+    Generated with <a href="/">Aztic</a> · AI-powered stock ratings ·
+    <a href="/terms.html">Terms</a> · <a href="/privacy.html">Privacy</a><br>
+    <span style="color:var(--red);margin-top:4px;display:block">⚠ Not financial advice. This is a point-in-time snapshot and may be outdated.</span>
+  </div>
+</div>
+
+<script>
+const SC = {green:'var(--green)',red:'var(--red)',amber:'var(--amber)',muted:'var(--muted)',dim:'var(--dim)'};
+const sc = c => SC[c] || 'var(--muted)';
+
+function switchPage(pageNum){
+  document.querySelectorAll('.report-page-container').forEach(el => {
+    el.classList.toggle('active', String(el.dataset.page) === String(pageNum));
+  });
+  document.querySelectorAll('.page-tab').forEach(el => {
+    el.classList.toggle('active', String(el.dataset.page) === String(pageNum));
+  });
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function buildChart(chart, col){
+  const W=680, H=180, PL=42, PB=20, PT=22, PR=10;
+  const prices = chart.prices || [];
+  if(prices.length === 0) return '<p style="color:var(--muted);font-size:11px">No chart data</p>';
+  const mn = chart.yMin ?? Math.min(...prices)*0.97;
+  const mx = chart.yMax ?? Math.max(...prices)*1.03;
+  const xs = prices.map((_,i) => PL + (i/(prices.length-1))*(W-PL-PR));
+  const ys = prices.map(p => PT + (1-(p-mn)/(mx-mn))*(H-PT-PB));
+  const c = col || '#4f8ef7';
+  let grid = '';
+  for(let i=0;i<=4;i++){
+    const frac = i/4;
+    const yy = PT + frac*(H-PT-PB);
+    const pv = Math.round(mx - (mx-mn)*frac);
+    const lbl = pv >= 1000 ? (pv/1000).toFixed(1)+'k' : pv;
+    grid += `<line x1="${PL}" y1="${yy.toFixed(1)}" x2="${W}" y2="${yy.toFixed(1)}" stroke="#252c40" stroke-width="1"/>`;
+    grid += `<text x="0" y="${(yy+3).toFixed(1)}" fill="#5a6285" font-family="IBM Plex Mono" font-size="10">$${lbl}</text>`;
+  }
+  const pts = xs.map((x,i) => `${x.toFixed(1)},${ys[i].toFixed(1)}`).join(' ');
+  const area = `${pts} ${xs[xs.length-1].toFixed(1)},${(H-PB).toFixed(1)} ${xs[0].toFixed(1)},${(H-PB).toFixed(1)}`;
+  const gid = 'cg' + Math.random().toString(36).substr(2,6);
+  let markers = '';
+  const lastIdx = xs.length - 1;
+  const markersData = (chart.markers||[])
+    .filter(mk => mk.monthIndex !== lastIdx)
+    .map(mk => { const xi = Math.max(0, Math.min(lastIdx-1, mk.monthIndex)); return {...mk, xi, x: xs[xi], y: ys[xi]}; })
+    .sort((a,b) => a.x - b.x);
+  const placedLabels = [];
+  markersData.forEach(mk => {
+    const {x, y} = mk;
+    const mc = mk.color || '#f59e0b';
+    markers += `<line x1="${x.toFixed(1)}" y1="${y.toFixed(1)}" x2="${x.toFixed(1)}" y2="${(H-PB).toFixed(1)}" stroke="${mc}" stroke-width="1" stroke-dasharray="3 3" opacity="0.5"/>`;
+    markers += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.5" fill="${mc}"/>`;
+    let labelAbove = y > H * 0.45;
+    let textAnchor, xPos;
+    if(x > W-75){ textAnchor='end'; xPos=x-6; } else if(x < PL+25){ textAnchor='start'; xPos=x+6; } else { textAnchor='middle'; xPos=x; }
+    let baseY = labelAbove ? y-10 : y+14;
+    let subY = labelAbove ? baseY-9 : baseY+9;
+    const overlap = placedLabels.some(p => Math.abs(p.x-xPos)<75 && (Math.min(baseY,subY)<=p.yBot+2 && Math.max(baseY,subY)>=p.yTop-2));
+    if(overlap){ labelAbove=!labelAbove; baseY=labelAbove?y-10:y+14; subY=labelAbove?baseY-9:baseY+9; }
+    if(Math.min(baseY,subY)<6){ const s=6-Math.min(baseY,subY); baseY+=s; subY+=s; }
+    if(Math.max(baseY,subY)>H+8){ const s=Math.max(baseY,subY)-(H+8); baseY-=s; subY-=s; }
+    placedLabels.push({x:xPos, yTop:Math.min(baseY,subY)-2, yBot:Math.max(baseY,subY)+2});
+    markers += `<text x="${xPos.toFixed(1)}" y="${baseY.toFixed(1)}" fill="${mc}" font-family="IBM Plex Mono" font-size="8" font-weight="600" text-anchor="${textAnchor}">${mk.label}</text>`;
+    if(mk.sublabel) markers += `<text x="${xPos.toFixed(1)}" y="${subY.toFixed(1)}" fill="${mc}" font-family="IBM Plex Mono" font-size="7" text-anchor="${textAnchor}" opacity="0.8">${mk.sublabel}</text>`;
+  });
+  const cx = xs[lastIdx], cy = ys[lastIdx];
+  const months = chart.months || [];
+  let xlbls = '';
+  xs.forEach((x,i) => {
+    const m = (months[i]||'').replace(/\s+/g,'');
+    const last = i===lastIdx;
+    xlbls += `<text x="${x.toFixed(1)}" y="${H+2}" fill="${last?c:'#5a6285'}" font-family="IBM Plex Mono" font-size="10" text-anchor="middle" ${last?'font-weight="bold"':''}>${m}</text>`;
+  });
+  const currentPriceLabel = `<text x="${(cx-7).toFixed(1)}" y="${(cy-9).toFixed(1)}" fill="${c}" font-family="IBM Plex Mono" font-size="11" font-weight="700" text-anchor="end">$${prices[lastIdx]}</text>`;
+  return `<svg viewBox="0 0 ${W} ${H+12}" xmlns="http://www.w3.org/2000/svg" style="width:100%;overflow:visible">
+  <defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="${c}" stop-opacity="0.2"/>
+    <stop offset="100%" stop-color="${c}" stop-opacity="0"/>
+  </linearGradient></defs>
+  ${grid}
+  <polygon points="${area}" fill="url(#${gid})"/>
+  <polyline points="${pts}" fill="none" stroke="${c}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  ${markers}
+  <circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="5" fill="${c}" stroke="#08090d" stroke-width="2"/>
+  ${currentPriceLabel}
+  ${xlbls}
+</svg>`;
+}
+
+function buildGauge(score, col){
+  const c = col || '#4f8ef7';
+  const pct = Math.max(0,Math.min(100,score))/100;
+  const dashArr = 251.2;
+  const dashOff = dashArr*(1-pct);
+  const angleDeg = 180 - pct*180;
+  const rad = angleDeg*Math.PI/180;
+  const nx = (100+80*Math.cos(rad)).toFixed(1);
+  const ny = (105-80*Math.sin(rad)).toFixed(1);
+  return `<svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg" style="width:240px">
+  <defs><linearGradient id="gg" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0%" stop-color="#ef4444"/><stop offset="40%" stop-color="#f59e0b"/>
+    <stop offset="75%" stop-color="#22c55e"/><stop offset="100%" stop-color="#4f8ef7"/>
+  </linearGradient></defs>
+  <path d="M 20 105 A 80 80 0 0 1 180 105" fill="none" stroke="#1e2230" stroke-width="11" stroke-linecap="round"/>
+  <path d="M 20 105 A 80 80 0 0 1 180 105" fill="none" stroke="url(#gg)" stroke-width="11" stroke-linecap="round" stroke-dasharray="${dashArr}" stroke-dashoffset="${dashOff.toFixed(1)}"/>
+  <line x1="100" y1="105" x2="${nx}" y2="${ny}" stroke="${c}" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="100" cy="105" r="5.5" fill="${c}"/>
+  <circle cx="100" cy="105" r="2.5" fill="#08090d"/>
+  <text x="14" y="118" fill="#ef4444" font-family="IBM Plex Mono" font-size="10" font-weight="700">0</text>
+  <text x="91" y="20" fill="#f59e0b" font-family="IBM Plex Mono" font-size="10">50</text>
+  <text x="175" y="118" fill="#22c55e" font-family="IBM Plex Mono" font-size="10">100</text>
+</svg>`;
+}
+
+function scoreBar(str, grad){
+  const m = str.match(/(\d+)\s*\/\s*(\d+)/);
+  if(!m) return '';
+  const pct = Math.round(parseInt(m[1])/parseInt(m[2])*100);
+  return `<div class="sc-track"><div class="sc-fill" style="width:${pct}%;background:${grad}"></div></div>`;
+}
+
+function buildFreshnessBanner(d){
+  if(!d.fetchedAt) return '';
+  const date = new Date(d.fetchedAt);
+  const now = new Date();
+  const diffHrs = Math.floor((now-date)/3600000);
+  const diffDays = Math.floor((now-date)/86400000);
+  let age, dotColor, borderColor, bgColor, staleWarning = '';
+  if(diffHrs<1){ age='just now'; dotColor='var(--green)'; borderColor='var(--border)'; bgColor='var(--bg3)'; }
+  else if(diffHrs<6){ age=`${diffHrs}h ago`; dotColor='var(--green)'; borderColor='var(--border)'; bgColor='var(--bg3)'; }
+  else if(diffHrs<48){ age=diffHrs<24?`${diffHrs}h ago`:'yesterday'; dotColor='var(--amber)'; borderColor='#f59e0b44'; bgColor='#f59e0b08'; }
+  else {
+    age=`${diffDays} days ago`;
+    dotColor='var(--red)'; borderColor='#ef444466'; bgColor='#ef444410';
+    staleWarning=`<div style="margin-top:10px;padding:9px 14px;background:#ef444410;border:1px solid #ef444444;border-radius:7px;display:flex;align-items:center;gap:10px;">
+      <span style="font-size:14px;flex-shrink:0">⚠️</span>
+      <div><div style="font-family:var(--mono);font-size:9px;font-weight:700;color:var(--red);letter-spacing:1px;text-transform:uppercase;">Snapshot ${diffDays} Days Old</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:2px;">Prices and news may have changed. <a href="/" style="color:var(--text)">Open Aztic</a> to generate a fresh report for <strong>${d.ticker}</strong>.</div></div></div>`;
+  }
+  return `<div><div class="data-freshness" style="border-color:${borderColor};background:${bgColor}">
+    <div class="freshness-dot" style="background:${dotColor}"></div>
+    <span>Snapshot fetched: <strong style="color:${dotColor}">${age}</strong> · ${d.fetchedAt} · ${d.dataSources||'Web search'}</span>
+  </div>${staleWarning}</div>`;
+}
+
+function renderReport(d){
+  const col = d.accentColor || '#ffffff';
+  const grad = d.accentGradient || `linear-gradient(135deg,${col},${col})`;
+
+  const kpiHTML = (d.kpis||[]).map(k=>`<div class="kc"><div class="kv">${k.val}</div><div class="kl">${k.label}</div><div class="ks" style="color:${sc(k.subColor)}">${k.sub}</div></div>`).join('');
+
+  const sections = ['Valuation','Financial Health','Growth'];
+  let cardsHTML = '';
+  sections.forEach(sec => {
+    const cards = (d.cards||[]).filter(c=>c.section===sec);
+    cardsHTML += `<div class="slbl">${sec}</div><div class="cards-grid">`;
+    cards.forEach(c => { cardsHTML += `<div class="kcard ${c.type}"><div class="cbadge">${c.badge}</div><div class="cmet">${c.metric}</div><div class="cval">${c.value}</div><div class="csub">${c.sub}</div><div class="cvs">${c.vs}</div></div>`; });
+    cardsHTML += '</div>';
+  });
+
+  const qHTML = (d.quarterlyRows||[]).map(r => {
+    const ip=r.isPending; const cc=ip?`style="color:${col}"`:''; const bg=ip?`style="background:${col}08"`:'';
+    return `<tr ${bg}><td ${cc}>${r.quarter}<br><span style="font-size:8px;color:var(--dim)">${r.period}</span></td><td ${cc}>${r.revenue}</td><td class="${r.growthPos===null?'':r.growthPos?'pos':'neg'}" ${cc}>${r.growth}</td><td ${cc}>${r.opIncome}</td><td class="${r.marginPos===null?'':r.marginPos?'pos':'neg'}" ${cc}>${r.margin}</td><td class="${r.epsPos===null?'':r.epsPos?'pos':'neg'}" ${cc}>${r.eps}</td><td class="${r.metricPos===null?'':r.metricPos?'pos':'neg'}" ${cc}>${r.metric}</td><td><span class="itag ${r.tagClass}">${r.tag}</span></td></tr>`;
+  }).join('');
+
+  const le = d.latestEarnings||{};
+  const earnHTML = (le.stats||[]).map(s=>`<div><div class="ev" style="color:${s.noteGood?'var(--green)':'var(--amber)'}">${s.val}</div><div class="el">${s.label}</div><div class="${s.noteGood?'eb':'ew'}">${s.note}</div></div>`).join('');
+
+  const nep = d.nextEarningsPreview||{};
+  const watchHTML = (nep.watchRows||[]).map(w=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);"><span style="font-size:11px;color:#9298b8">${w.label}</span><span style="font-family:var(--mono);font-size:14px;font-weight:600;color:var(--amber)">${w.value}</span></div>`).join('');
+
+  const catHTML = (d.catalysts||[]).map(c=>`<li><span class="ibull">▲</span><div><strong>${c.title}</strong> — ${c.body}</div></li>`).join('');
+  const riskHTML = (d.risks||[]).map(r=>`<li><span class="ibear">▼</span><div><strong>${r.title}</strong> — ${r.body}</div></li>`).join('');
+
+  const v = d.verdict||{};
+  const np = Math.max(0,Math.min(100,v.needlePosition||50));
+  const vc = v.ratingColor||col;
+
+  document.getElementById('report-wrap').innerHTML = `
+<div class="report-doc">
+  ${buildFreshnessBanner(d)}
+  <div class="page-tabs">
+    <button class="page-tab active" data-page="1" onclick="switchPage(1)"><span class="pn">1</span>Overview</button>
+    <button class="page-tab" data-page="2" onclick="switchPage(2)"><span class="pn">2</span>Earnings &amp; Outlook</button>
+  </div>
+
+  <div class="report-page-container active" data-page="1">
+  <div class="stock-bar" style="--ticker-color:${col}">
+    <div class="ticker-badge" style="background:${grad}">${d.ticker}</div>
+    <div class="co-block">
+      <div class="co-name">${d.companyName}</div>
+      <div class="co-meta">${d.exchange}${(d.sector||'').split('·')[0]?' · '+(d.sector||'').split('·')[0].trim():''}</div>
+      ${(d.sector||'').split('·')[1]?`<div class="co-industry">${(d.sector||'').split('·')[1].trim()}</div>`:''}
+    </div>
+    <div class="sbdiv"></div>
+    <div class="bst"><div class="bst-v" style="font-family:var(--mono);font-size:11px">${d.week52}</div><div class="bst-l">52W Range</div></div>
+    <div class="sbdiv"></div>
+    <div class="bst"><div class="bst-v">${d.marketCap}</div><div class="bst-l">Market Cap</div></div>
+    <div class="sbdiv"></div>
+    <div class="bst"><div class="bst-v">${d.sharesOut}</div><div class="bst-l">Shares Out.</div></div>
+    <div class="sbdiv"></div>
+    <div class="bst"><span class="rating-pill" style="color:${d.ratingColor};border-color:${d.ratingColor};background:${d.ratingColor}18">${d.ratingLabel}</span><div class="bst-l" style="margin-top:4px">${d.analystCount}</div></div>
+    <div class="sbdiv"></div>
+    <div class="price-block">
+      <div class="price-big">${d.price}</div>
+      <div class="price-sub" style="color:${d.priceIsNeg?'var(--red)':'var(--green)'}">${d.priceChangeSub}</div>
+    </div>
+  </div>
+
+  <div class="metric-row">
+    <div class="gauge-card">
+      <div class="g-lbl">Aztic Rating</div>
+      ${buildGauge(d.riskScore||50, col)}
+      <div class="g-num">${d.riskScore}</div>
+      <div class="g-rating" style="color:${d.riskLabelColor||col}">${d.riskLabel}</div>
+      <div class="g-sub">As of ${d.reportDate}</div>
+    </div>
+    <div class="score-card" style="display:flex;flex-direction:column;justify-content:center;">
+      <div class="sc-hdr">Aztic Breakdown</div>
+      <div class="sc-row"><div class="sc-top"><div class="sc-name">Valuation</div><div class="sc-val">${d.scoreVal}</div></div>${scoreBar(d.scoreVal,`linear-gradient(90deg,${col},#818cf8)`)}<div class="sc-note">${d.scoreValNote}</div></div>
+      <div class="sc-row"><div class="sc-top"><div class="sc-name">Financial Health</div><div class="sc-val">${d.scoreHealth}</div></div>${scoreBar(d.scoreHealth,'linear-gradient(90deg,#22c55e,'+col+')')}<div class="sc-note">${d.scoreHealthNote}</div></div>
+      <div class="sc-row"><div class="sc-top"><div class="sc-name">Growth</div><div class="sc-val">${d.scoreGrowth}</div></div>${scoreBar(d.scoreGrowth,'linear-gradient(90deg,#f59e0b,#22c55e)')}<div class="sc-note">${d.scoreGrowthNote}</div></div>
+    </div>
+  </div>
+
+  <div class="chart-row"><div class="chart-card">
+    <div class="ch-hdr"><div class="ch-title">12-Month Price Chart</div><div class="ch-leg"><div class="leg-i"><div class="leg-d" style="background:${col}"></div>${d.ticker} Price</div></div></div>
+    ${buildChart(d.chart||{}, col)}
+  </div></div>
+
+  <div class="kpi-strip">${kpiHTML}</div>
+  ${cardsHTML}
+
+  <div class="rfooter">
+    <span>${d.ticker} · Aztic · ${d.reportDate}</span>
+    <span>${d.dataSources||''}</span>
+    <span>Overview</span>
+  </div>
+  <div class="page-nav-bottom">
+    <span class="pn-info">Page 1 of 2</span>
+    <button class="pn-btn primary" onclick="switchPage(2)">Earnings &amp; Outlook →</button>
+  </div>
+  </div>
+
+  <div class="report-page-container" data-page="2">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+    <div>
+      <div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;">${d.companyName} · ${d.ticker}</div>
+      <div style="font-size:18px;font-weight:700;margin-top:3px;">Earnings &amp; Outlook Analysis</div>
+    </div>
+    <div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:right;">Next: <span style="color:var(--amber)">${d.nextEarningsDate||'TBD'}</span><br>${d.nextEarningsEst||''}</div>
+  </div>
+
+  <div class="bcard" style="margin-bottom:18px">
+    <div class="bc-title"><span>📊</span> Quarterly Performance Trend</div>
+    <table class="qtable"><thead><tr><th>Quarter</th><th>Revenue</th><th>YoY</th><th>Op Income</th><th>Op Margin</th><th>EPS</th><th>Key Metric</th><th>vs Est.</th></tr></thead><tbody>${qHTML}</tbody></table>
+  </div>
+
+  <div class="p2-grid">
+    <div class="bcard">
+      <div class="bc-title"><span>⚡</span> ${le.title||'Latest Earnings'}</div>
+      <div class="eg">${earnHTML}</div>
+      <div class="en">${le.note||''}</div>
+    </div>
+    <div class="bcard">
+      <div class="bc-title"><span>🎯</span> ${nep.title||'Next Earnings Preview'}</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:12px;">${nep.intro||''}</div>
+      <div style="display:flex;flex-direction:column">${watchHTML}</div>
+      <div style="margin-top:13px;padding:10px 12px;background:var(--bg3);border-radius:6px;border:1px solid var(--border2);">
+        <span style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;color:${col}">${nep.consensusLabel||'CONSENSUS'}: </span>
+        <span style="font-size:12px;color:var(--muted)">${nep.consensusNote||''}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="dual-col">
+    <div class="bcard"><div class="bc-title"><span>🚀</span> Bull Catalysts</div><ul class="catlist">${catHTML}</ul></div>
+    <div class="bcard"><div class="bc-title"><span>⚠️</span> Bear Risks</div><ul class="risklist">${riskHTML}</ul></div>
+  </div>
+
+  <div class="verdict-card" style="--v-color:${vc}">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:7px;">Bottom Line · Verdict</div>
+        <div style="font-family:var(--mono);font-size:20px;font-weight:700;color:${vc};margin-bottom:6px;">${(v.ratingLine||'').replace(/RISK SCORE/gi,'AZTIC SCORE')}</div>
+      </div>
+      <div style="text-align:right;font-family:var(--mono);font-size:11px;color:var(--muted);">
+        <div>${d.analystCount} Coverage</div>
+        <div style="color:var(--green);font-size:12px;font-weight:600;margin-top:3px;">${v.analystBreakdown||''}</div>
+        <div style="margin-top:3px">Avg: ${v.avgTarget} (${v.targetUpside})</div>
+        ${v.streetHigh?`<div style="margin-top:2px">High: ${v.streetHigh}</div>`:''}
+      </div>
+    </div>
+    <div style="margin:18px 0 14px">
+      <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:5px;"><span>STRONG SELL</span><span>SELL</span><span>HOLD</span><span>BUY</span><span>STRONG BUY</span></div>
+      <div class="rt"><div class="rn" style="left:${np}%;border-color:${vc};box-shadow:0 0 8px ${vc}66"></div></div>
+      <div class="rl"><span>0</span><span>25</span><span>50</span><span>75</span><span>100</span></div>
+    </div>
+    <div style="font-size:13px;color:#a3a8c2;line-height:1.8">${v.verdictText||''}</div>
+  </div>
+
+  <div class="rfooter">
+    <span>${d.ticker} · Aztic · ${d.reportDate}</span>
+    <span style="color:var(--red);font-size:10px">⚠ Informational only · Not financial advice</span>
+    <span>Earnings &amp; Outlook</span>
+  </div>
+  <div class="page-nav-bottom">
+    <button class="pn-btn" onclick="switchPage(1)">← Back to Overview</button>
+    <span class="pn-info">Page 2 of 2</span>
+  </div>
+  </div>
+</div>`;
+
+  document.getElementById('state-wrap').style.display = 'none';
+  document.getElementById('report-wrap').style.display = 'block';
+  document.getElementById('share-footer').style.display = 'block';
+  document.title = `${d.ticker} · ${d.companyName} · Aztic`;
+}
+
+function showError(title, sub){
+  document.getElementById('state-wrap').innerHTML = `<div class="state-inner">
+    <div class="state-logo">∅</div>
+    <div class="state-title">${title}</div>
+    <div class="state-sub">${sub}</div>
+  </div>`;
+}
+
+async function init(){
+  const parts = window.location.pathname.split('/');
+  const hash = parts[parts.length-1];
+  if(!hash || hash.length < 8){
+    showError('Invalid link', 'This share link appears to be malformed.');
+    return;
+  }
+
+  let supabaseUrl, supabaseAnonKey;
+  try {
+    const cfg = await fetch('/api/config').then(r => r.json());
+    supabaseUrl = cfg.supabaseUrl;
+    supabaseAnonKey = cfg.supabaseAnonKey;
+  } catch {
+    showError('Failed to load', 'Could not reach Aztic. Please try again.');
+    return;
+  }
+
+  if(!supabaseUrl){
+    showError('Not available', 'Shared reports are not available in dev mode.');
+    return;
+  }
+
+  try {
+    const res = await fetch(
+      `${supabaseUrl}/rest/v1/shared_reports?hash=eq.${encodeURIComponent(hash)}&select=report_json`,
+      { headers: { 'apikey': supabaseAnonKey } }
+    );
+    if(!res.ok) throw new Error('Fetch failed');
+    const data = await res.json();
+    if(!data || data.length === 0){
+      showError('Report not found', 'This share link may have expired or been removed.');
+      return;
+    }
+    renderReport(data[0].report_json);
+  } catch {
+    showError('Something went wrong', 'Could not load this report. Please try again later.');
+  }
+}
+
+init();
+</script>
+</body>
+</html>

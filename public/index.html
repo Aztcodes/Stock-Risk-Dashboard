@@ -278,15 +278,16 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:1
 
 /* ─── FLOATING ACTIONS ───────────────────────────────────────────────── */
 #floating-actions{position:fixed;bottom:20px;right:20px;z-index:100;display:flex;gap:8px;align-items:center;}
-#print-btn,#copy-btn{border:none;cursor:pointer;font-family:var(--mono);font-size:11px;font-weight:700;padding:10px 16px;border-radius:7px;display:flex;align-items:center;gap:7px;letter-spacing:0.5px;transition:opacity .15s,transform .15s;background:var(--text);color:var(--bg);box-shadow:0 4px 18px #00000088;}
-#print-btn{background:var(--bg2);color:var(--text);border:1px solid var(--border2);}
-#print-btn:hover,#copy-btn:hover{opacity:.85;}
-#print-btn:hover{background:var(--bg3);opacity:1;}
+#share-btn,#print-btn,#copy-btn{border:none;cursor:pointer;font-family:var(--mono);font-size:11px;font-weight:700;padding:10px 16px;border-radius:7px;display:flex;align-items:center;gap:7px;letter-spacing:0.5px;transition:opacity .15s,transform .15s;background:var(--text);color:var(--bg);box-shadow:0 4px 18px #00000088;}
+#share-btn,#print-btn{background:var(--bg2);color:var(--text);border:1px solid var(--border2);}
+#share-btn:hover,#print-btn:hover,#copy-btn:hover{opacity:.85;}
+#share-btn:hover,#print-btn:hover{background:var(--bg3);opacity:1;}
+#share-btn:disabled{opacity:.4;cursor:not-allowed;}
 
 /* ─── PRINT STYLES ──────────────────────────────────────────────────── */
 @media print {
   body{background:#fff !important;color:#000 !important;}
-  #sidebar,#floating-actions,.page-tabs,.page-nav-bottom,.noise{display:none !important;}
+  #sidebar,#floating-actions,#share-modal,.page-tabs,.page-nav-bottom,.noise{display:none !important;}
   #shell{display:block !important;}
   #viewport{overflow:visible !important;background:#fff !important;background-image:none !important;}
   #report-wrap{max-width:100% !important;padding:20px !important;}
@@ -577,7 +578,26 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:1
 </main>
 </div>
 
+<!-- ══════════════════ SHARE MODAL ══════════════════ -->
+<div id="share-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:28px;width:100%;max-width:480px;">
+    <div style="font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:1px;color:var(--text);margin-bottom:5px;">SHARE REPORT</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.6;">Anyone with this link can view a read-only snapshot. Prices shown are from when the report was generated.</div>
+    <div style="display:flex;gap:8px;margin-bottom:20px;">
+      <input id="share-url" style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:11px;padding:9px 12px;outline:none;min-width:0;" readonly>
+      <button onclick="copyShareUrl()" id="share-copy-btn" style="background:var(--text);color:var(--bg);border:none;cursor:pointer;font-family:var(--mono);font-size:11px;font-weight:700;padding:9px 14px;border-radius:6px;white-space:nowrap;transition:opacity .15s;flex-shrink:0;">Copy</button>
+    </div>
+    <div style="display:flex;justify-content:flex-end;">
+      <button onclick="closeShareModal()" style="background:transparent;border:1px solid var(--border);color:var(--muted);cursor:pointer;font-family:var(--mono);font-size:11px;padding:8px 14px;border-radius:6px;transition:all .15s;">Close</button>
+    </div>
+  </div>
+</div>
+
 <div id="floating-actions" style="display:none;">
+  <button id="share-btn" onclick="shareReport()" title="Share this report">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+    Share
+  </button>
   <button id="print-btn" onclick="printReport()" title="Print or Save as PDF">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
     Print / PDF
@@ -896,6 +916,7 @@ async function fetchStock(){
   btn.textContent = '…';
   _reportJSON = '';
   _livePrice = null;
+  _shareHash = null;
 
   hideStatus();
   showLoadingState(ticker);
@@ -1502,6 +1523,50 @@ Sources: ${d.dataSources||''}
     btn.innerHTML = '✓ Copied!';
     setTimeout(() => { btn.innerHTML = orig; }, 2000);
   }).catch(()=>{});
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SHARE
+═══════════════════════════════════════════════════════════════════ */
+let _shareHash = null;
+
+async function shareReport(){
+  if(!currentData) return;
+  if(_shareHash){
+    document.getElementById('share-url').value = `${window.location.origin}/r/${_shareHash}`;
+    document.getElementById('share-modal').style.display = 'flex';
+    return;
+  }
+  const btn = document.getElementById('share-btn');
+  const origHTML = btn.innerHTML;
+  btn.disabled = true;
+  btn.textContent = '…';
+  try {
+    const token = await getAccessToken();
+    const res = await fetch('/api/share', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...(token ? { 'Authorization': `Bearer ${token}` } : {}) },
+      body: JSON.stringify({ reportJson: currentData })
+    });
+    if(!res.ok){ const e = await res.json().catch(()=>({})); throw new Error(e.error || 'Share failed'); }
+    const { hash } = await res.json();
+    _shareHash = hash;
+    document.getElementById('share-url').value = `${window.location.origin}/r/${hash}`;
+    document.getElementById('share-modal').style.display = 'flex';
+  } catch(e){
+    alert('Could not create share link: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = origHTML;
+  }
+}
+function closeShareModal(){ document.getElementById('share-modal').style.display = 'none'; }
+function copyShareUrl(){
+  navigator.clipboard.writeText(document.getElementById('share-url').value).then(() => {
+    const btn = document.getElementById('share-copy-btn');
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 2000);
+  });
 }
 
 /* ═══════════════════════════════════════════════════════════════════

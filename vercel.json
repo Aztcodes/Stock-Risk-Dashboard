@@ -1,1 +1,5 @@
-{}
+{
+  "rewrites": [
+    { "source": "/r/:hash", "destination": "/share.html" }
+  ]
+}
