@@ -140,6 +140,7 @@ export default async function handler(req) {
   if (req.method !== 'POST') return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
 
   // Auth guard — skipped in dev mode when SUPABASE_URL is not set
+  let _userId = null, _authToken = null;
   if (process.env.SUPABASE_URL) {
     const authHeader = req.headers.get('Authorization');
     const token = authHeader?.replace('Bearer ', '').trim();
@@ -151,6 +152,22 @@ export default async function handler(req) {
     });
     if (!userRes.ok) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
+    }
+    const userData = await userRes.json();
+    _userId = userData.id;
+    _authToken = token;
+
+    // Rate limit: max 10 fetches per hour per user
+    const since = new Date(Date.now() - 3600000).toISOString();
+    const rlRes = await fetch(
+      `${process.env.SUPABASE_URL}/rest/v1/fetch_log?user_id=eq.${_userId}&created_at=gte.${encodeURIComponent(since)}&select=id`,
+      { headers: { 'Authorization': `Bearer ${token}`, 'apikey': process.env.SUPABASE_ANON_KEY || '', 'Prefer': 'count=exact' } }
+    );
+    const count = parseInt(rlRes.headers.get('content-range')?.split('/')[1] || '0');
+    if (count >= 10) {
+      return new Response(JSON.stringify({ error: 'Rate limit exceeded. You can run up to 10 reports per hour.' }), {
+        status: 429, headers: { 'Content-Type': 'application/json', ...corsHeaders }
+      });
     }
   }
 
@@ -197,6 +214,18 @@ export default async function handler(req) {
           }
         }
         controller.close();
+        // Log this fetch for rate limiting (fire-and-forget)
+        if (_userId && _authToken && process.env.SUPABASE_URL) {
+          fetch(`${process.env.SUPABASE_URL}/rest/v1/fetch_log`, {
+            method: 'POST',
+            headers: {
+              'apikey': process.env.SUPABASE_ANON_KEY || '',
+              'Authorization': `Bearer ${_authToken}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ user_id: _userId })
+          }).catch(() => {});
+        }
       } catch (err) {
         const msg = err instanceof Anthropic.APIError ? err.message : (err?.message ?? 'Internal server error');
         controller.error(new Error(msg));

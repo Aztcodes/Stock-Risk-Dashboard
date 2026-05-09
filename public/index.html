@@ -527,11 +527,16 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:1
 /* ═══════════════════════════════════════════════════════════════════
    HISTORY MANAGEMENT
 ═══════════════════════════════════════════════════════════════════ */
-function clearAllData(){
+async function clearAllData(){
   if(!confirm('Clear all stored history?')) return;
   localStorage.removeItem('srr_history');
   history_ = [];
   renderHistoryList();
+
+  if(_supabase){
+    const { data: { session } } = await _supabase.auth.getSession();
+    if(session) await _supabase.from('reports').delete().eq('user_id', session.user.id);
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -634,9 +639,8 @@ function hideLoadingState(success){
 ═══════════════════════════════════════════════════════════════════ */
 let history_ = JSON.parse(localStorage.getItem('srr_history') || '[]');
 
-function saveHistory(d){
-  history_ = history_.filter(x => x.ticker !== d.ticker);
-  history_.unshift({
+async function saveHistory(d){
+  const entry = {
     ticker: d.ticker,
     company: d.companyName,
     score: d.riskScore,
@@ -645,10 +649,34 @@ function saveHistory(d){
     date: d.reportDate,
     fetchedAt: d.fetchedAt || null,
     raw: JSON.stringify(d, null, 2)
-  });
-  history_ = history_.slice(0, 20); // keep last 20
+  };
+  history_ = history_.filter(x => x.ticker !== d.ticker);
+  history_.unshift(entry);
+  history_ = history_.slice(0, 20);
   localStorage.setItem('srr_history', JSON.stringify(history_));
   renderHistoryList();
+
+  if(_supabase){
+    const { data: { session } } = await _supabase.auth.getSession();
+    if(session){
+      await _supabase.from('reports').delete().match({ user_id: session.user.id, ticker: d.ticker });
+      const { data } = await _supabase.from('reports').insert({
+        user_id: session.user.id,
+        ticker: d.ticker,
+        company_name: d.companyName,
+        risk_score: d.riskScore,
+        risk_label: d.riskLabel,
+        risk_label_color: d.riskLabelColor || '#fff',
+        report_date: d.reportDate,
+        fetched_at: d.fetchedAt || null,
+        raw: d
+      }).select('id');
+      if(data?.[0]?.id){
+        const idx = history_.findIndex(h => h.ticker === d.ticker);
+        if(idx !== -1) history_[idx].dbId = data[0].id;
+      }
+    }
+  }
 }
 
 function renderHistoryList(){
@@ -681,10 +709,62 @@ function loadFromHistory(i){
   fetchLivePrice(ticker).then(applyLivePriceToDOM);
 }
 
-function deleteHistory(e, i){
+async function deleteHistory(e, i){
   e.stopPropagation();
+  const h = history_[i];
   history_.splice(i, 1);
   localStorage.setItem('srr_history', JSON.stringify(history_));
+  renderHistoryList();
+
+  if(_supabase && h.dbId){
+    const { data: { session } } = await _supabase.auth.getSession();
+    if(session) await _supabase.from('reports').delete().eq('id', h.dbId);
+  }
+}
+
+async function loadHistoryFromDB(){
+  if(!_supabase){ renderHistoryList(); return; }
+  const { data: { session } } = await _supabase.auth.getSession();
+  if(!session){ renderHistoryList(); return; }
+
+  const { data } = await _supabase
+    .from('reports')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(20);
+
+  if(data){
+    if(data.length === 0 && history_.length > 0){
+      // One-time migration: upload existing localStorage reports to DB
+      const toMigrate = [...history_].reverse();
+      for(const h of toMigrate){
+        try {
+          const d = JSON.parse(h.raw);
+          await _supabase.from('reports').insert({
+            user_id: session.user.id,
+            ticker: d.ticker, company_name: d.companyName,
+            risk_score: d.riskScore, risk_label: d.riskLabel,
+            risk_label_color: d.riskLabelColor || '#fff',
+            report_date: d.reportDate, fetched_at: d.fetchedAt || null,
+            raw: d
+          });
+        } catch {}
+      }
+      await loadHistoryFromDB(); return;
+    }
+    history_ = data.map(r => ({
+      ticker: r.ticker,
+      company: r.company_name,
+      score: r.risk_score,
+      label: r.risk_label,
+      color: r.risk_label_color || '#fff',
+      date: r.report_date,
+      fetchedAt: r.fetched_at,
+      raw: JSON.stringify(r.raw, null, 2),
+      dbId: r.id
+    }));
+    localStorage.setItem('srr_history', JSON.stringify(history_));
+  }
   renderHistoryList();
 }
 
@@ -1372,7 +1452,7 @@ function showApp(session){
   document.getElementById('auth-screen').style.display = 'none';
   document.getElementById('shell').style.display = 'flex';
   if(session) document.getElementById('auth-signout-btn').style.display = '';
-  renderHistoryList();
+  loadHistoryFromDB();
 }
 
 function showAuthScreen(){
