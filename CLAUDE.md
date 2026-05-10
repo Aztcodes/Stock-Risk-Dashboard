@@ -12,7 +12,7 @@ AI-powered stock ratings dashboard. User enters a ticker → Anthropic Claude AP
 
 ## Project Status
 
-**Stage 2 complete (May 2026).** All infrastructure is live: auth, DB, rate limiting, history, mobile responsive, share links, legal pages. Next: monitor Stage 2 retention, then build Stage 3 (monetisation).
+**Stage 2 complete (May 2026).** All infrastructure is live: auth, DB, rate limiting, history, mobile responsive, share links, legal pages. Next: collect friend/family feedback, then plan and build Stage 3 (monetisation). See `ROADMAP.md` for pre-Stage 3 checklist.
 
 See `ROADMAP.md` for the full plan and decision gates.
 
@@ -62,7 +62,7 @@ Key functions: `fetchStock()`, `renderReport()`, `buildChart()`, `buildGauge()`,
 ## Critical Rules — Do Not Change Without Discussion
 
 - **`max_uses: 4` and `max_tokens: 8000` in `api/fetch.js`** — production-validated. Reducing either degrades report quality unacceptably.
-- **Scoring rubric in SYSTEM_PROMPT** — uses per-dimension rubrics (Valuation 0–35, Health 0–35, Growth 0–30), not category anchors. Anchors caused score clustering.
+- **Scoring rubric in SYSTEM_PROMPT** — 60/40 hybrid: 60% deterministic anchored metrics, 40% Claude qualitative judgment. Valuation (20 anchored + 15 judgment = 35), Financial Health (20 + 15 = 35), Growth (18 + 12 = 30). Anchors: Valuation uses P/E vs sector median + P/S vs 3yr range; Health uses debt-to-equity + FCF; Growth uses revenue growth YoY + EPS trend. Full spec in `stage3_batches.md` under Pre-Batch. Do not revert to pure qualitative scoring — it caused run-to-run variance.
 - **Auth guard pattern** — extract token from `Authorization` header, verify via `${SUPABASE_URL}/auth/v1/user`, extract `userData.id`. All protected routes follow this pattern.
 - **No inline API key** — `ANTHROPIC_API_KEY` is server-side only, never exposed to frontend.
 
@@ -80,6 +80,14 @@ Dev mode: if `SUPABASE_URL` is not set, auth is bypassed and history falls back 
 
 ---
 
+## Notes for Claude
+
+- **Do not use Glob to search this repo.** `node_modules/` contains hundreds of packages and will flood and truncate Glob results, making project files appear missing. Always use `Read` with a direct known path (e.g. `Read api/fetch.js`, `Read public/index.html`).
+- **For Stage 3 planning**, read `ROADMAP.md` in addition to this file — it has the full feature list, pricing decisions, and batch structure.
+- **node_modules** is local-only (in `.gitignore`). It is not in the GitHub repo. Its presence in the local folder is expected and necessary for `vercel dev`.
+
+---
+
 ## Key Files
 
 ```
@@ -89,11 +97,13 @@ api/
   share.js      — Share link creation
   config.js     — Supabase config for frontend
 public/
-  index.html    — Entire frontend (CSS + JS + HTML)
-  share.html    — Public read-only report viewer
+  index.html    — Entire frontend, served at /app
+  share.html    — Public read-only report viewer (/r/:hash)
   terms.html    — Terms of Service
   privacy.html  — Privacy Policy
-ROADMAP.md      — Full product roadmap + decision gates
-FUTURE_IDEAS.md — Backlog of post-Stage-3 ideas
+  landing.html  — (Batch 2, not yet built) Marketing page at /
+ROADMAP.md        — Full product roadmap + decision gates
+stage3_batches.md — Detailed Stage 3 batch specs (endpoints, schemas, quota logic)
+FUTURE_IDEAS.md   — Backlog of post-Stage-3 ideas
 vercel.json     — Route rewrite: /r/:hash → share.html
 ```

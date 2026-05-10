@@ -229,7 +229,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:1
     <span class="sh-brand">AZTIC</span>
     <span class="sh-badge">SHARED REPORT</span>
   </div>
-  <a href="/" class="sh-cta">Open Aztic →</a>
+  <a href="/app" class="sh-cta">Open Aztic →</a>
 </div>
 
 <div id="viewport">
@@ -243,7 +243,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:1
   <div class="share-footer" id="share-footer" style="display:none">
     Generated with <a href="/">Aztic</a> · AI-powered stock ratings ·
     <a href="/terms.html">Terms</a> · <a href="/privacy.html">Privacy</a><br>
-    <span style="color:var(--red);margin-top:4px;display:block">⚠ Not financial advice. This is a point-in-time snapshot and may be outdated.</span>
+    <span style="color:var(--red);margin-top:4px;display:block">⚠ Not financial advice. This is a point-in-time snapshot and may be outdated. <a href="/app" style="color:inherit">Open Aztic</a> for a fresh report.</span>
   </div>
 </div>
 
@@ -379,7 +379,7 @@ function buildFreshnessBanner(d){
     staleWarning=`<div style="margin-top:10px;padding:9px 14px;background:#ef444410;border:1px solid #ef444444;border-radius:7px;display:flex;align-items:center;gap:10px;">
       <span style="font-size:14px;flex-shrink:0">⚠️</span>
       <div><div style="font-family:var(--mono);font-size:9px;font-weight:700;color:var(--red);letter-spacing:1px;text-transform:uppercase;">Snapshot ${diffDays} Days Old</div>
-      <div style="font-size:10px;color:var(--muted);margin-top:2px;">Prices and news may have changed. <a href="/" style="color:var(--text)">Open Aztic</a> to generate a fresh report for <strong>${d.ticker}</strong>.</div></div></div>`;
+      <div style="font-size:10px;color:var(--muted);margin-top:2px;">Prices and news may have changed. <a href="/app" style="color:var(--text)">Open Aztic</a> to generate a fresh report for <strong>${d.ticker}</strong>.</div></div></div>`;
   }
   return `<div><div class="data-freshness" style="border-color:${borderColor};background:${bgColor}">
     <div class="freshness-dot" style="background:${dotColor}"></div>

@@ -36,7 +36,7 @@ Single-file BYOK HTML product (`StockRiskDashboard_v2_1.html`). No server, no au
 ## Stage 2 — Hosted Multi-User App ✅ COMPLETE
 
 **Launched:** May 2026  
-**Goal:** 5+ friends/family using it weekly within 14 days of launch
+**Goal:** 5+ friends/family use it and provide feedback
 
 ### Batch 1 — Quick Wins ✅ DONE
 - API key UI removed from frontend (was vestigial after moving to server-side key)
@@ -75,22 +75,37 @@ Single-file BYOK HTML product (`StockRiskDashboard_v2_1.html`). No server, no au
 
 ---
 
+## Pre-Stage 3 — Planning & Preparation
+
+Intentional holding pattern before Stage 3 build starts. Not stalled — waiting on the following:
+
+- [ ] Collect feedback from 5+ friends/family who use the live app
+- [ ] Evaluate a new product idea (to be discussed separately)
+- [ ] Plan Stage 3 work in batches (same approach as Stage 2)
+- [ ] Walk through the existing codebase so Joshua understands the full stack (not just following instructions)
+- [ ] Understand Vercel and Supabase — what each service is doing and why
+
+---
+
 ## Stage 3 — Monetised SaaS
 
 **Target:** End July 2026  
-**Gate:** Stage 2 retention >30% WoW before starting; 5 beta paid users committed before launch
+**Gate:** Pre-Stage 3 checklist above complete; 5 beta paid users committed before launch
 
-### Pricing (revised from original plan)
-At ~$0.20/report, the original "3 fetches/day" free tier is unviable (up to $18/month per free user in API costs). Revised model:
+> Full batch-by-batch implementation spec (endpoints, schemas, frontend changes, quota logic) is in **`stage3_batches.md`**. This section is the summary view.
 
-- **Free:** 3 reports/month — enough to genuinely evaluate the product, low cost exposure (~$0.60/month per free user)
-- **Pro:** $9/month — capped at ~50–100 reports/month (protects against power-user edge cases)
-- **Pro Annual:** $90/year
+### Pricing (locked May 2026)
+Assuming max $0.30/report (4 web searches + accumulated tokens). Model:
+
+- **Free:** 1 report/week (~4/month) — weekly cadence builds habit loop; max cost ~$1.30/month per free user
+- **Starter Pack:** $5 one-time, 5 reports, no expiry — conversion bridge between free and Pro; not positioned as a Pro alternative
+- **Pro:** $9/month, 30 reports/month — break-even at max $0.30/report cost; average user runs 10–20/month
+- **Pro Annual:** $90/year, 30 reports/month — 2 months free vs monthly
 
 No BYOK tier — the target audience (less experienced investors) would find it intimidating and it undermines the "just enter a ticker" UX promise.
 
 ### Features
-- Stripe integration (Free / Pro / Pro Annual tiers)
+- Stripe integration (Free / Starter Pack / Pro / Pro Annual tiers)
 - Landing page with hero, sample reports, pricing, FAQ
 - Watchlist feature + email staleness alerts
 - Comparison mode (2–3 tickers side-by-side)
@@ -105,9 +120,7 @@ No BYOK tier — the target audience (less experienced investors) would find it 
 
 | Milestone | Date | Gate |
 |---|---|---|
-| Stage 2 launch | End May 2026 | 5+ friends/family using weekly within 14 days |
-| First 25 active users | Mid June 2026 | Are users returning? |
-| Stage 3 build start | Late June 2026 | Stage 2 retention >30% WoW |
+| Stage 2 launch | End May 2026 | 5+ friends/family use and receive feedback |
 | Stage 3 launch | End July 2026 | 5 beta paid users committed |
 | Revenue target | End Sept 2026 | $450 MRR — invest in growth or pivot/pause |
 
@@ -118,6 +131,6 @@ No BYOK tier — the target audience (less experienced investors) would find it 
 - **Brand:** Aztic (clean, memorable, "tic" echoes stock ticks)
 - **Auth/DB:** Supabase (all-in-one vs Clerk + separate DB)
 - **API key:** Server-side only — not BYOK. Keeps UX simple for less experienced audience.
-- **Free tier:** Reports/month cap (not per day) — cost-driven decision
+- **Free tier:** 1 report/week — weekly cadence for habit formation; stronger retention than a monthly cap
 - **Schema as contract:** The 50+ field JSON schema is the single interface between backend and renderer. Provider-agnostic — could swap to OpenAI/Gemini in ~1–2 days.
 - **No custom domain yet:** `*.vercel.app` is sufficient for Stage 2. Register and connect for Stage 3 launch.
