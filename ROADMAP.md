@@ -75,15 +75,13 @@ Single-file BYOK HTML product (`StockRiskDashboard_v2_1.html`). No server, no au
 
 ---
 
-## Pre-Stage 3 — Planning & Preparation
+## Pre-Stage 3 — Planning & Preparation ✅ COMPLETE
 
-Intentional holding pattern before Stage 3 build starts. Not stalled — waiting on the following:
-
-- [ ] Collect feedback from 5+ friends/family who use the live app
-- [ ] Evaluate a new product idea (to be discussed separately)
-- [ ] Plan Stage 3 work in batches (same approach as Stage 2)
-- [ ] Walk through the existing codebase so Joshua understands the full stack (not just following instructions)
-- [ ] Understand Vercel and Supabase — what each service is doing and why
+- [x] Collect feedback from 5+ friends/family who use the live app
+- [x] Evaluate a new product idea — discussed in cowork; outcome was the 60/40 hybrid Aztic scoring model (shipped as pre-batch)
+- [x] Plan Stage 3 work in batches — `stage3_batches.md`
+- [x] Walk through the existing codebase so Joshua understands the full stack
+- [x] Understand Vercel and Supabase — what each service is doing and why
 
 ---
 
