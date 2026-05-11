@@ -908,6 +908,14 @@ function applyLivePriceToDOM(){
    AI FETCH
 ═══════════════════════════════════════════════════════════════════ */
 let _reportJSON = '';
+let _wakeLock = null;
+async function acquireWakeLock(){
+  if(!('wakeLock' in navigator)) return;
+  try { _wakeLock = await navigator.wakeLock.request('screen'); } catch {}
+}
+function releaseWakeLock(){
+  if(_wakeLock){ _wakeLock.release(); _wakeLock = null; }
+}
 
 function quickFetch(ticker){
   document.getElementById('ticker-input').value = ticker;
@@ -929,6 +937,7 @@ async function fetchStock(){
   hideStatus();
   showLoadingState(ticker);
   closeSidebar();
+  acquireWakeLock();
   fetchLivePrice(ticker); // runs in parallel — resolves long before Claude finishes
 
   try {
@@ -985,6 +994,7 @@ async function fetchStock(){
     showStatus('Fetch Failed', err.message, 'error', 100);
     console.error('Fetch error:', err);
   } finally {
+    releaseWakeLock();
     btn.disabled = false;
     btn.textContent = '⚡ Fetch';
   }
