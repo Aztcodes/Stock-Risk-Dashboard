@@ -21,7 +21,7 @@
   --body:'DM Sans',sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-html{font-size:14px;-webkit-font-smoothing:antialiased;}
+html{font-size:14px;-webkit-font-smoothing:antialiased;overflow-x:hidden;}
 body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:100vh;overflow-x:hidden;}
 
 /* ─── LAYOUT ─────────────────────────────────────────────────────────── */
@@ -946,6 +946,7 @@ async function fetchStock(){
       const err = await response.json().catch(() => ({}));
       const msg = err?.error || `HTTP ${response.status}`;
       if(response.status === 429) throw new Error('Rate limited. Wait a moment and try again.');
+      if(response.status === 401) throw new Error('Session expired. Please sign out and sign back in.');
       throw new Error(msg);
     }
 
