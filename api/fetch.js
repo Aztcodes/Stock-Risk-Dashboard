@@ -42,6 +42,9 @@ CRITICAL RULES:
 - fetchedAt: set to today's ISO date string
 - PE ratio: if trailing PE is above 200x due to near-zero positive earnings, display as ">200x" rather than the exact inflated multiple. Negative PE (company lost money) should be shown as-is (e.g. "-203x") since it conveys real information
 - All specific dates, prices, and figures MUST come from your web search results. Training data dates can be off by 1–2 years — always prefer and verify against web search results
+- chart.fairValueLow: sector-median P/E × forward 12-month consensus EPS. Round to nearest whole dollar. Set to null for pre-profit companies where forward EPS ≤ 0.
+- chart.fairValueHigh: analyst consensus mean price target as a plain number (e.g. 285, not "$285"). Must match verdict.avgTarget numerically. Set to null if unavailable.
+- chart.yMin / chart.yMax: must bracket both the 13-month price range AND the fair value range so neither fairValueLow nor fairValueHigh is clipped off the chart.
 
 SCHEMA (every field is required unless marked optional):
 {
@@ -81,7 +84,9 @@ SCHEMA (every field is required unless marked optional):
     "yMax": number,
     "markers": [
       {"monthIndex": integer 0-12, "label": string, "sublabel": string, "color": string}
-    ]  // 2-4 annotated events
+    ],  // 2-4 annotated events
+    "fairValueLow": number | null,  // sector-median P/E × forward EPS, rounded to nearest dollar. null for pre-profit companies
+    "fairValueHigh": number | null  // analyst consensus mean target as a plain number (matches verdict.avgTarget). null if unavailable
   },
   "cards": [
     {

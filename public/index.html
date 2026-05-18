@@ -12,7 +12,7 @@
 :root {
   --bg:#08090d; --bg2:#0e1018; --bg3:#141720; --bg4:#09090e;
   --border:#1e2230; --border2:#262b3a; --border3:#2e3450;
-  --text:#e8eaf2; --muted:#6b7194; --dim:#3a3f55;
+  --text:#e8eaf2; --muted:#9298b8; --dim:#5a6285;
   --green:#22c55e; --green-dim:#16a34a1a;
   --red:#ef4444;   --red-dim:#dc26261a;
   --amber:#f59e0b; --amber-dim:#d977061a;
@@ -570,7 +570,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:1
       </div>
       <div class="ls-line" id="ls-line">Initialising…</div>
       <div class="ls-bar-wrap"><div class="ls-bar-fill" id="ls-bar-fill"></div></div>
-      <div style="font-family:var(--mono);font-size:10px;color:var(--dim);text-align:center;line-height:1.7;margin-top:8px;">Keep this page open · Don't lock your screen<br>Leaving mid-fetch uses a report credit without generating a report</div>
+      <div style="font-family:var(--mono);font-size:11px;color:var(--amber);text-align:center;line-height:1.8;margin-top:14px;padding:10px 16px;background:#f59e0b0d;border:1px solid #f59e0b33;border-radius:7px;max-width:360px;">⚠ Keep this page open — don't switch apps or lock your screen<br><span style="font-size:10px;opacity:0.7;">Leaving mid-fetch uses a report credit without generating a report</span></div>
     </div>
   </div>
 
@@ -910,6 +910,11 @@ function applyLivePriceToDOM(){
 ═══════════════════════════════════════════════════════════════════ */
 let _reportJSON = '';
 let _wakeLock = null;
+let _fetchInProgress = false;
+let _switchedAwayDuringFetch = false;
+document.addEventListener('visibilitychange', () => {
+  if(document.hidden && _fetchInProgress) _switchedAwayDuringFetch = true;
+});
 async function acquireWakeLock(){
   if(!('wakeLock' in navigator)) return;
   try { _wakeLock = await navigator.wakeLock.request('screen'); } catch {}
@@ -934,14 +939,21 @@ async function fetchStock(){
   _reportJSON = '';
   _livePrice = null;
   _shareHash = null;
+  _fetchInProgress = true;
+  _switchedAwayDuringFetch = false;
 
   hideStatus();
   showLoadingState(ticker);
   closeSidebar();
   acquireWakeLock();
-  fetchLivePrice(ticker); // runs in parallel — resolves long before Claude finishes
 
   try {
+    // Validate ticker against Yahoo Finance before spending a Claude credit
+    const priceRes = await fetch(`/api/price?ticker=${encodeURIComponent(ticker)}`);
+    const priceData = priceRes.ok ? await priceRes.json() : null;
+    if(!priceData || priceData.error) throw new Error(`"${ticker}" wasn't found. Double-check the symbol and try again.`);
+    _livePrice = priceData;
+
     const token = await getAccessToken();
     const response = await fetch('/api/fetch', {
       method: 'POST',
@@ -992,9 +1004,18 @@ async function fetchStock(){
   } catch(err) {
     hideLoadingState(false);
     document.getElementById('empty-state').style.display = 'flex';
-    showStatus('Fetch Failed', err.message, 'error', 100);
+    const msg = _switchedAwayDuringFetch
+      ? 'Report stopped — you switched away mid-fetch. Keep this page open next time.'
+      : err.message;
+    showStatus('Fetch Failed', msg, 'error', 100);
+    const retryBtn = document.createElement('button');
+    retryBtn.textContent = 'RETRY';
+    retryBtn.style.cssText = 'background:var(--amber);color:#000;border:none;cursor:pointer;font-family:var(--mono);font-size:9px;font-weight:700;padding:3px 8px;border-radius:4px;margin-left:8px;letter-spacing:0.5px;vertical-align:middle;';
+    retryBtn.onclick = fetchStock;
+    document.getElementById('status-message').appendChild(retryBtn);
     console.error('Fetch error:', err);
   } finally {
+    _fetchInProgress = false;
     releaseWakeLock();
     btn.disabled = false;
     btn.textContent = '⚡ Fetch';
@@ -1008,11 +1029,16 @@ function buildChart(chart, col){
   const W=680, H=180, PL=42, PB=20, PT=22, PR=10;
   const prices = chart.prices || [];
   if(prices.length === 0) return '<p style="color:var(--muted);font-size:11px">No chart data</p>';
-  const mn = chart.yMin ?? Math.min(...prices)*0.97;
-  const mx = chart.yMax ?? Math.max(...prices)*1.03;
+  const fvLow = (chart.fairValueLow != null && chart.fairValueLow > 0) ? chart.fairValueLow : null;
+  const fvHigh = (chart.fairValueHigh != null && chart.fairValueHigh > 0) ? chart.fairValueHigh : null;
+  let mn = chart.yMin ?? Math.min(...prices)*0.97;
+  let mx = chart.yMax ?? Math.max(...prices)*1.03;
+  if(fvLow != null) mn = Math.min(mn, fvLow * 0.97);
+  if(fvHigh != null) mx = Math.max(mx, fvHigh * 1.03);
   const xs = prices.map((_,i) => PL + (i/(prices.length-1))*(W-PL-PR));
   const ys = prices.map(p => PT + (1-(p-mn)/(mx-mn))*(H-PT-PB));
   const c = col || '#4f8ef7';
+  const toY = v => PT + (1-(v-mn)/(mx-mn))*(H-PT-PB);
 
   let grid = '';
   for(let i=0;i<=4;i++){
@@ -1094,6 +1120,24 @@ function buildChart(chart, col){
   // Always show current price label next to the dot — markers no longer compete for this space
   const currentPriceLabel = `<text x="${(cx-7).toFixed(1)}" y="${(cy-9).toFixed(1)}" fill="${c}" font-family="IBM Plex Mono" font-size="11" font-weight="700" text-anchor="end">$${prices[lastIdx]}</text>`;
 
+  let fvBand = '';
+  const clampY = v => Math.max(PT, Math.min(H-PB, toY(v)));
+  if(fvHigh != null && fvLow != null){
+    const yH = clampY(fvHigh);
+    const yL = clampY(fvLow);
+    const yTop = Math.min(yH, yL);
+    const yBot = Math.max(yH, yL);
+    fvBand += `<rect x="${PL}" y="${yTop.toFixed(1)}" width="${(W-PL-PR).toFixed(1)}" height="${(yBot-yTop).toFixed(1)}" fill="#818cf812" stroke="none"/>`;
+    fvBand += `<line x1="${PL}" y1="${yH.toFixed(1)}" x2="${(W-PR).toFixed(1)}" y2="${yH.toFixed(1)}" stroke="#818cf8" stroke-width="1" stroke-dasharray="5 3" opacity="0.65"/>`;
+    fvBand += `<line x1="${PL}" y1="${yL.toFixed(1)}" x2="${(W-PR).toFixed(1)}" y2="${yL.toFixed(1)}" stroke="#818cf8" stroke-width="1" stroke-dasharray="5 3" opacity="0.45"/>`;
+    fvBand += `<text x="${(PL+4).toFixed(1)}" y="${Math.max(PT+8, yH-3).toFixed(1)}" fill="#818cf8" font-family="IBM Plex Mono" font-size="8" text-anchor="start" opacity="0.8">Analyst $${Math.round(fvHigh)}</text>`;
+    fvBand += `<text x="${(PL+4).toFixed(1)}" y="${Math.min(H-PB-2, yL+9).toFixed(1)}" fill="#818cf8" font-family="IBM Plex Mono" font-size="8" text-anchor="start" opacity="0.65">P/E Fair $${Math.round(fvLow)}</text>`;
+  } else if(fvHigh != null){
+    const yH = clampY(fvHigh);
+    fvBand += `<line x1="${PL}" y1="${yH.toFixed(1)}" x2="${(W-PR).toFixed(1)}" y2="${yH.toFixed(1)}" stroke="#818cf8" stroke-width="1" stroke-dasharray="5 3" opacity="0.65"/>`;
+    fvBand += `<text x="${(PL+4).toFixed(1)}" y="${Math.max(PT+8, yH-3).toFixed(1)}" fill="#818cf8" font-family="IBM Plex Mono" font-size="8" text-anchor="start" opacity="0.8">Analyst $${Math.round(fvHigh)}</text>`;
+  }
+
   return `<svg viewBox="0 0 ${W} ${H+12}" xmlns="http://www.w3.org/2000/svg" style="width:100%;overflow:visible">
   <defs>
     <linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
@@ -1102,6 +1146,7 @@ function buildChart(chart, col){
     </linearGradient>
   </defs>
   ${grid}
+  ${fvBand}
   <polygon points="${area}" fill="url(#${gid})"/>
   <polyline points="${pts}" fill="none" stroke="${c}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
   ${markers}
@@ -1359,7 +1404,10 @@ function renderReport(){
     <div class="chart-card">
       <div class="ch-hdr">
         <div class="ch-title">12-Month Price Chart</div>
-        <div class="ch-leg"><div class="leg-i"><div class="leg-d" style="background:${col}"></div>${d.ticker} Price</div></div>
+        <div class="ch-leg">
+          <div class="leg-i"><div class="leg-d" style="background:${col}"></div>${d.ticker} Price</div>
+          ${(d.chart?.fairValueHigh) ? `<div class="leg-i"><div style="width:14px;height:0;border-top:1.5px dashed #818cf8;opacity:.7;margin-bottom:1px"></div><span style="color:#818cf8">Fair Value Range</span></div>` : ''}
+        </div>
       </div>
       ${buildChart(d.chart||{}, col)}
     </div>
@@ -1659,7 +1707,14 @@ async function submitAuth(){
   btn.disabled = false;
   btn.textContent = _authMode === 'signin' ? 'Sign In' : 'Create Account';
 
-  if(error){ errEl.textContent = error.message; return; }
+  if(error){
+    if(_authMode === 'signup' && /already registered|already in use/i.test(error.message)){
+      errEl.innerHTML = 'An account with this email already exists — <span style="cursor:pointer;text-decoration:underline" onclick="setAuthMode(\'signin\')">sign in instead</span>.';
+    } else {
+      errEl.textContent = error.message;
+    }
+    return;
+  }
   if(_authMode === 'signup'){
     errEl.className = 'ok';
     errEl.textContent = 'Check your email to confirm your account.';
