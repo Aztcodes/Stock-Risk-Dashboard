@@ -496,9 +496,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:1
   </div>
 
   <div id="sidebar-tabs">
-    <div class="stab active" onclick="switchTab('data')">Data</div>
+    <div class="stab active" onclick="switchTab('data')">Fetch</div>
+    <div class="stab" onclick="switchTab('paste')">Entry</div>
     <div class="stab" onclick="switchTab('history')">History</div>
-    <div class="stab" onclick="switchTab('paste')">Paste</div>
   </div>
 
   <!-- ── DATA TAB ── -->
@@ -708,7 +708,7 @@ async function clearAllData(){
 /* ═══════════════════════════════════════════════════════════════════
    TABS
 ═══════════════════════════════════════════════════════════════════ */
-const TAB_NAMES = ['data','history','paste'];
+const TAB_NAMES = ['data','paste','history'];
 function switchTab(t){
   document.querySelectorAll('.stab').forEach((el,i) =>
     el.classList.toggle('active', TAB_NAMES[i] === t));
