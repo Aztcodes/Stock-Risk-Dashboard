@@ -85,6 +85,31 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:1
 
 /* ─── HISTORY TAB ────────────────────────────────────────────────────── */
 #history-list{padding:10px;display:flex;flex-direction:column;gap:5px;overflow-y:auto;flex:1;}
+
+/* ─── PASTE TAB ──────────────────────────────────────────────────────── */
+#paste-panel{padding:14px;display:flex;flex-direction:column;gap:10px;flex:1;overflow:hidden;}
+#paste-input{
+  flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;
+  color:var(--text);font-family:var(--mono);font-size:10px;line-height:1.6;
+  padding:10px 12px;outline:none;resize:none;min-height:0;
+  transition:border-color .15s;
+}
+#paste-input:focus{border-color:var(--border3);}
+#paste-input::placeholder{color:var(--dim);}
+.paste-btns{display:flex;gap:7px;flex-shrink:0;}
+#btn-render{
+  flex:1;background:var(--text);color:var(--bg);border:none;cursor:pointer;
+  font-family:var(--mono);font-size:11px;font-weight:700;padding:9px 14px;
+  border-radius:6px;letter-spacing:0.5px;transition:opacity .15s;
+}
+#btn-render:hover{opacity:.85;}
+#btn-clear{
+  background:var(--bg3);color:var(--muted);border:1px solid var(--border2);cursor:pointer;
+  font-family:var(--mono);font-size:11px;font-weight:700;padding:9px 12px;
+  border-radius:6px;letter-spacing:0.5px;transition:all .15s;
+}
+#btn-clear:hover{border-color:var(--border3);color:var(--text);}
+#paste-error{font-family:var(--mono);font-size:10px;color:var(--red);display:none;line-height:1.5;flex-shrink:0;}
 .hist-item{background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:10px 12px;cursor:pointer;transition:border-color .15s;}
 .hist-item:hover{border-color:var(--border2);}
 .hist-top{display:flex;justify-content:space-between;align-items:center;}
@@ -473,6 +498,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:1
   <div id="sidebar-tabs">
     <div class="stab active" onclick="switchTab('data')">Data</div>
     <div class="stab" onclick="switchTab('history')">History</div>
+    <div class="stab" onclick="switchTab('paste')">Paste</div>
   </div>
 
   <!-- ── DATA TAB ── -->
@@ -523,6 +549,19 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:1
   <div class="tab-panel" id="tab-history">
     <div id="history-list">
       <div id="no-history">No reports yet.<br>Fetch or render a ticker to start building history.</div>
+    </div>
+  </div>
+
+  <!-- ── PASTE TAB ── -->
+  <div class="tab-panel" id="tab-paste">
+    <div id="paste-panel">
+      <div class="fp-label">Paste JSON Payload</div>
+      <textarea id="paste-input" placeholder="Paste a Claude-generated JSON payload here…" spellcheck="false"></textarea>
+      <div id="paste-error"></div>
+      <div class="paste-btns">
+        <button id="btn-render" onclick="renderFromPaste()">▶ Render</button>
+        <button id="btn-clear" onclick="clearPaste()">Clear</button>
+      </div>
     </div>
   </div>
 
@@ -669,12 +708,30 @@ async function clearAllData(){
 /* ═══════════════════════════════════════════════════════════════════
    TABS
 ═══════════════════════════════════════════════════════════════════ */
-const TAB_NAMES = ['data','history'];
+const TAB_NAMES = ['data','history','paste'];
 function switchTab(t){
   document.querySelectorAll('.stab').forEach((el,i) =>
     el.classList.toggle('active', TAB_NAMES[i] === t));
   TAB_NAMES.forEach(id =>
     document.getElementById('tab-'+id).classList.toggle('visible', id===t));
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   PASTE / JSON RENDER
+═══════════════════════════════════════════════════════════════════ */
+function renderFromPaste(){
+  const raw = document.getElementById('paste-input').value.trim();
+  const errEl = document.getElementById('paste-error');
+  errEl.style.display = 'none';
+  if(!raw){ errEl.textContent = 'Nothing to render — paste a JSON payload first.'; errEl.style.display='block'; return; }
+  try{ JSON.parse(raw); } catch(e){ errEl.textContent = 'Invalid JSON: ' + e.message; errEl.style.display='block'; return; }
+  _reportJSON = raw;
+  _livePrice = null;
+  renderReport();
+}
+function clearPaste(){
+  document.getElementById('paste-input').value = '';
+  document.getElementById('paste-error').style.display = 'none';
 }
 
 /* ═══════════════════════════════════════════════════════════════════
