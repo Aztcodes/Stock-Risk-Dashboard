@@ -62,7 +62,7 @@ Key functions: `fetchStock()`, `renderReport()`, `buildChart()`, `buildGauge()`,
 ## Critical Rules — Do Not Change Without Discussion
 
 - **`max_uses: 4` and `max_tokens: 8000` in `api/fetch.js`** — production-validated. Reducing either degrades report quality unacceptably.
-- **Scoring rubric in SYSTEM_PROMPT** — 60/40 hybrid: 60% deterministic anchored metrics, 40% Claude qualitative judgment. Valuation (20 anchored + 15 judgment = 35), Financial Health (20 + 15 = 35), Growth (18 + 12 = 30). Anchors: Valuation uses P/E vs sector median + P/S vs 3yr range; Health uses debt-to-equity + FCF; Growth uses revenue growth YoY + EPS trend. Full spec in `stage3_batches.md` under Pre-Batch. Do not revert to pure qualitative scoring — it caused run-to-run variance.
+- **Scoring rubric in SYSTEM_PROMPT** — pure Claude qualitative judgment. Valuation (0–35), Financial Health (0–35), Growth (0–30). Band anchors provide loose guidance; Claude uses all available data to score. Do not add deterministic anchors without discussion.
 - **Auth guard pattern** — extract token from `Authorization` header, verify via `${SUPABASE_URL}/auth/v1/user`, extract `userData.id`. All protected routes follow this pattern.
 - **No inline API key** — `ANTHROPIC_API_KEY` is server-side only, never exposed to frontend.
 

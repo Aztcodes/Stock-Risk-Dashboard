@@ -10,30 +10,14 @@ Return ONLY a valid JSON object — absolutely no markdown, no code fences, no e
 
 CRITICAL RULES:
 - price: current market price string e.g. "$411.22"
-- riskScore: integer 0-100. Use the 60/40 hybrid model below. For each dimension, calculate the anchored sub-score from the cited web-search metric, then add a judgment sub-score, then sum. Total = Valuation + Financial Health + Growth.
+- riskScore: integer 0-100. Score each dimension using your qualitative judgment based on all data found in your web search. Total = Valuation + Financial Health + Growth.
 
-  VALUATION (0-35) = Anchored 20 + Judgment 15
-    Anchored:
-      • P/E vs sector median (0-14): well below median = 12-14; at median = 7-11; moderately above = 3-6; severely above or negative earnings inflating PE = 0-2
-      • P/S vs company's own 3-year range (0-6): below range = 5-6; mid-range = 3-4; above range = 0-2
-    Judgment (0-15): premium/discount justified by quality, growth runway, or cyclicality not captured by the multiples
-
-  FINANCIAL HEALTH (0-35) = Anchored 20 + Judgment 15
-    Anchored:
-      • Debt-to-equity (0-12): <0.5 = 10-12; 0.5-1.5 = 6-9; 1.5-3.0 = 2-5; >3.0 or negative equity = 0-1
-      • Free cash flow (0-8): strongly positive and growing = 7-8; marginally positive = 4-6; breakeven/negative = 0-3
-    Judgment (0-15): margin trend, capital allocation, liquidity buffer, off-balance-sheet items
-
-  GROWTH (0-30) = Anchored 18 + Judgment 12
-    Anchored:
-      • Revenue growth YoY (0-10): >20% = 9-10; 10-20% = 6-8; 0-10% = 3-5; negative = 0-2
-      • EPS trend last 3 quarters (0-8): accelerating = 7-8; flat/mixed = 3-6; declining = 0-2
-    Judgment (0-12): durability of growth — moat, TAM expansion, product cycle, recent catalysts/headwinds not in trailing numbers
-
-  Use the actual metric values from your web search to set each anchored sub-score; do not anchor to category ranges or peer-group averages. If a specific metric is unavailable after searching, pick the midpoint of the closest band and note the uncertainty in the corresponding scoreNote.
+  VALUATION (0-35): 30-35 = deeply undervalued; 20-29 = fair value; 10-19 = moderately expensive; 0-9 = severely overvalued
+  FINANCIAL HEALTH (0-35): 30-35 = fortress balance sheet; 20-29 = solid; 10-19 = leveraged; 0-9 = distressed
+  GROWTH (0-30): 25-30 = accelerating strongly; 15-24 = steady; 5-14 = slowing; 0-4 = declining
 
 - scoreVal / scoreHealth / scoreGrowth: string e.g. "23 / 35" — the dimension total
-- scoreValNote / scoreHealthNote / scoreGrowthNote: short string that MUST cite the breakdown using actual values, e.g. "P/E 32x vs 28x sector (8/14) + P/S mid-range (4/6) + premium for moat (11/15) = 23/35". Keep under ~140 chars.
+- scoreValNote / scoreHealthNote / scoreGrowthNote: short string summarising the key factors driving that dimension's score. Keep under ~140 chars.
 - chart.prices: array of exactly 13 numbers representing monthly close prices, ending with today's price
 - chart.markers: ONLY include events that occurred within the 13-month chart window (the past 13 months from today). Do NOT include events from before this window — no matter how significant. Verify every marker date against your web search results; never use training data dates for markers.
 - cards: exactly 9 objects — 3 with section "Valuation", 3 with section "Financial Health", 3 with section "Growth"
