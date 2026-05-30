@@ -1160,15 +1160,15 @@ function buildChart(chart, col){
     const yL = clampY(fvLow);
     const yTop = Math.min(yH, yL);
     const yBot = Math.max(yH, yL);
-    fvBand += `<rect x="${PL}" y="${yTop.toFixed(1)}" width="${(W-PL-PR).toFixed(1)}" height="${(yBot-yTop).toFixed(1)}" fill="#818cf812" stroke="none"/>`;
-    fvBand += `<line x1="${PL}" y1="${yH.toFixed(1)}" x2="${(W-PR).toFixed(1)}" y2="${yH.toFixed(1)}" stroke="#818cf8" stroke-width="1" stroke-dasharray="5 3" opacity="0.65"/>`;
-    fvBand += `<line x1="${PL}" y1="${yL.toFixed(1)}" x2="${(W-PR).toFixed(1)}" y2="${yL.toFixed(1)}" stroke="#818cf8" stroke-width="1" stroke-dasharray="5 3" opacity="0.45"/>`;
-    fvBand += `<text x="${(PL+4).toFixed(1)}" y="${Math.max(PT+8, yH-3).toFixed(1)}" fill="#818cf8" font-family="IBM Plex Mono" font-size="8" text-anchor="start" opacity="0.8">Analyst $${Math.round(fvHigh)}</text>`;
-    fvBand += `<text x="${(PL+4).toFixed(1)}" y="${Math.min(H-PB-2, yL+9).toFixed(1)}" fill="#818cf8" font-family="IBM Plex Mono" font-size="8" text-anchor="start" opacity="0.65">P/E Fair $${Math.round(fvLow)}</text>`;
+    fvBand += `<rect x="${PL}" y="${yTop.toFixed(1)}" width="${(W-PL-PR).toFixed(1)}" height="${(yBot-yTop).toFixed(1)}" fill="#818cf820" stroke="none"/>`;
+    fvBand += `<line x1="${PL}" y1="${yH.toFixed(1)}" x2="${(W-PR).toFixed(1)}" y2="${yH.toFixed(1)}" stroke="#818cf8" stroke-width="1.5" stroke-dasharray="6 3" opacity="0.9"/>`;
+    fvBand += `<line x1="${PL}" y1="${yL.toFixed(1)}" x2="${(W-PR).toFixed(1)}" y2="${yL.toFixed(1)}" stroke="#818cf8" stroke-width="1.5" stroke-dasharray="6 3" opacity="0.7"/>`;
+    fvBand += `<text x="${(PL+4).toFixed(1)}" y="${Math.max(PT+8, yH-4).toFixed(1)}" fill="#818cf8" font-family="IBM Plex Mono" font-size="9" font-weight="600" text-anchor="start" opacity="0.95">Analyst $${Math.round(fvHigh)}</text>`;
+    fvBand += `<text x="${(PL+4).toFixed(1)}" y="${Math.min(H-PB-2, yL+10).toFixed(1)}" fill="#818cf8" font-family="IBM Plex Mono" font-size="9" font-weight="600" text-anchor="start" opacity="0.8">P/E Fair $${Math.round(fvLow)}</text>`;
   } else if(fvHigh != null){
     const yH = clampY(fvHigh);
-    fvBand += `<line x1="${PL}" y1="${yH.toFixed(1)}" x2="${(W-PR).toFixed(1)}" y2="${yH.toFixed(1)}" stroke="#818cf8" stroke-width="1" stroke-dasharray="5 3" opacity="0.65"/>`;
-    fvBand += `<text x="${(PL+4).toFixed(1)}" y="${Math.max(PT+8, yH-3).toFixed(1)}" fill="#818cf8" font-family="IBM Plex Mono" font-size="8" text-anchor="start" opacity="0.8">Analyst $${Math.round(fvHigh)}</text>`;
+    fvBand += `<line x1="${PL}" y1="${yH.toFixed(1)}" x2="${(W-PR).toFixed(1)}" y2="${yH.toFixed(1)}" stroke="#818cf8" stroke-width="1.5" stroke-dasharray="6 3" opacity="0.9"/>`;
+    fvBand += `<text x="${(PL+4).toFixed(1)}" y="${Math.max(PT+8, yH-4).toFixed(1)}" fill="#818cf8" font-family="IBM Plex Mono" font-size="9" font-weight="600" text-anchor="start" opacity="0.95">Analyst $${Math.round(fvHigh)}</text>`;
   }
 
   return `<svg viewBox="0 0 ${W} ${H+12}" xmlns="http://www.w3.org/2000/svg" style="width:100%;overflow:visible">

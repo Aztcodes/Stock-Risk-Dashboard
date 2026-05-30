@@ -1,6 +1,6 @@
-# Aztic — Future Ideas & Backlog
+# Aztic — Personal Backlog
 
-Ideas to revisit after Stage 3 launch. Not prioritised — just captured so they're not lost.
+Ideas to revisit at some point. Not prioritised — just captured so they're not lost.
 
 ---
 

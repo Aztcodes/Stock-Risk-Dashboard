@@ -81,7 +81,7 @@ Dev mode: if `SUPABASE_URL` is not set, auth is bypassed and history falls back 
 ## Notes for Claude
 
 - **Do not use Glob to search this repo.** `node_modules/` contains hundreds of packages and will flood and truncate Glob results, making project files appear missing. Always use `Read` with a direct known path (e.g. `Read api/fetch.js`, `Read public/index.html`).
-- **For Stage 3 planning**, read `ROADMAP.md` in addition to this file — it has the full feature list, pricing decisions, and batch structure.
+- **Stage 3 is paused indefinitely.** Aztic is a personal tool. See `ROADMAP.md` for the full history and decision.
 - **node_modules** is local-only (in `.gitignore`). It is not in the GitHub repo. Its presence in the local folder is expected and necessary for `vercel dev`.
 
 ---
