@@ -1,7 +1,10 @@
-# Aztic — Stage 3 Batch Plan
+# Aztic — Stage 3 Batch Plan ⛔ ARCHIVED
 
-**Target:** End July 2026  
-**Gate:** Pre-Stage 3 checklist complete; 5 beta paid users committed before launch  
+> **Status (May 2026): Not proceeding.** Stage 3 was paused indefinitely — market too crowded with free alternatives. This document is kept for reference only. Aztic is a personal tool.
+
+---
+
+**Original target:** End July 2026  
 **Stack context:** Vercel Edge Runtime · Supabase (auth + PostgreSQL) · Anthropic Claude API · single-file frontend (`public/index.html`)
 
 ---

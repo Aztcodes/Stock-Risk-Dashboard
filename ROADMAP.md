@@ -4,7 +4,9 @@
 
 A web-based dashboard that generates structured 2-page risk reports for individual stocks. The user enters a ticker, the app calls the Anthropic API (with `web_search`) to fetch live market data, and renders a comprehensive analysis covering valuation, financial health, growth, catalysts, and risks — with an overall risk score (0–100).
 
-**Target users:** Retail investors with $5K–$500K portfolios who want clear, synthesised stock analysis without the complexity of Bloomberg or the noise of forums. Also investment clubs and finance students. The audience skews toward less experienced investors, so UX simplicity is a priority.
+**Current status (May 2026): Personal tool.** Stage 3 (monetisation) is paused indefinitely. The market has too many free alternatives for a paid product to gain traction at this stage. Aztic is kept live for personal use and iterated on as needed.
+
+**Original target users:** Retail investors with $5K–$500K portfolios who want clear, synthesised stock analysis without the complexity of Bloomberg or the noise of forums.
 
 ---
 
@@ -23,7 +25,7 @@ A web-based dashboard that generates structured 2-page risk reports for individu
 - **Hosting:** Vercel (free Hobby tier), domain is `*.vercel.app` for now
 - **Legal:** `public/terms.html`, `public/privacy.html` — linked from auth screen, sidebar, and report footer
 
-**Cost per report:** ~$0.20–0.40 (4 web searches + accumulated input tokens + JSON output). This informs the Stage 3 free tier design — free tier should be capped at reports per month, not per day.
+**Cost per report:** ~$0.20–0.40 (4 web searches + accumulated input tokens + JSON output).
 
 ---
 
@@ -75,52 +77,26 @@ Single-file BYOK HTML product (`StockRiskDashboard_v2_1.html`). No server, no au
 
 ---
 
-## Pre-Stage 3 — Planning & Preparation ✅ COMPLETE
+## Pre-Stage 3 — Planning & Preparation ✅ COMPLETE (not proceeding)
 
-- [x] Collect feedback from 5+ friends/family who use the live app
-- [x] Evaluate a new product idea — discussed in cowork; outcome was the 60/40 hybrid Aztic scoring model (shipped as pre-batch)
-- [x] Plan Stage 3 work in batches — `stage3_batches.md`
-- [x] Walk through the existing codebase so Joshua understands the full stack
-- [x] Understand Vercel and Supabase — what each service is doing and why
+Planning was completed but Stage 3 was called off in May 2026. The full batch spec is preserved in `stage3_batches.md` for reference if the project is ever revisited.
 
 ---
 
-## Stage 3 — Monetised SaaS
+## Stage 3 — Monetised SaaS ⛔ PAUSED INDEFINITELY
 
-**Target:** End July 2026  
-**Gate:** Pre-Stage 3 checklist above complete; 5 beta paid users committed before launch
+**Decision (May 2026):** Not proceeding. Market has too many free alternatives; paid traction unlikely without significant marketing investment that isn't justified at this stage. Aztic continues as a personal tool.
 
-> Full batch-by-batch implementation spec (endpoints, schemas, frontend changes, quota logic) is in **`stage3_batches.md`**. This section is the summary view.
-
-### Pricing (locked May 2026)
-Assuming max $0.30/report (4 web searches + accumulated tokens). Model:
-
-- **Free:** 1 report/week (~4/month) — weekly cadence builds habit loop; max cost ~$1.30/month per free user
-- **Starter Pack:** $5 one-time, 5 reports, no expiry — conversion bridge between free and Pro; not positioned as a Pro alternative
-- **Pro:** $9/month, 30 reports/month — break-even at max $0.30/report cost; average user runs 10–20/month
-- **Pro Annual:** $90/year, 30 reports/month — 2 months free vs monthly
-
-No BYOK tier — the target audience (less experienced investors) would find it intimidating and it undermines the "just enter a ticker" UX promise.
-
-### Features
-- Stripe integration (Free / Starter Pack / Pro / Pro Annual tiers)
-- Landing page with hero, sample reports, pricing, FAQ
-- Watchlist feature + email staleness alerts
-- Comparison mode (2–3 tickers side-by-side)
-- SEO-friendly public report archive
-- PostHog analytics
-
-**MRR targets:** $450 MRR (50 paid users) by month 3 post-launch; $1,170 MRR by month 6
+The pricing model, batch specs, and feature list designed for Stage 3 are archived in `stage3_batches.md`.
 
 ---
 
 ## Decision Gates
 
-| Milestone | Date | Gate |
+| Milestone | Date | Outcome |
 |---|---|---|
-| Stage 2 launch | End May 2026 | 5+ friends/family use and receive feedback |
-| Stage 3 launch | End July 2026 | 5 beta paid users committed |
-| Revenue target | End Sept 2026 | $450 MRR — invest in growth or pivot/pause |
+| Stage 2 launch | End May 2026 | ✅ Complete |
+| Stage 3 launch | — | ⛔ Paused — not proceeding |
 
 ---
 

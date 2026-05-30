@@ -12,9 +12,7 @@ AI-powered stock ratings dashboard. User enters a ticker → Anthropic Claude AP
 
 ## Project Status
 
-**Stage 2 complete (May 2026).** All infrastructure is live: auth, DB, rate limiting, history, mobile responsive, share links, legal pages. Next: collect friend/family feedback, then plan and build Stage 3 (monetisation). See `ROADMAP.md` for pre-Stage 3 checklist.
-
-See `ROADMAP.md` for the full plan and decision gates.
+**Personal tool (May 2026).** Stage 2 is complete and live. Stage 3 (monetisation) is paused indefinitely — market too crowded with free alternatives. Aztic is iterated on for personal use only. See `ROADMAP.md` for full history.
 
 ---
 
